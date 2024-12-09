@@ -6,18 +6,19 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
-export default async function getCompletion({ message }: { message: string }) {
+export default async function getCompletion({ messages }: { messages: Message[] }) {
   const completion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
       { role: "system", content: "You are a helpful assistant." },
-      {
-        role: "user",
-        content: message
-      },
+      ...messages,
     ],
   });
 
-  return completion
+  return completion;
 }

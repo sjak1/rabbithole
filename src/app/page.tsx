@@ -18,7 +18,7 @@ export default function Home() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const completion = await getCompletion({ message });
+    const completion = await getCompletion({ messages: [...messages, { role: 'user', content: message }] });
     const aiMessage = completion.choices[0].message.content ?? "No response";
     setResponse({ role: 'assistant', content: aiMessage });
     setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
