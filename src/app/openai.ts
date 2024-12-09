@@ -6,16 +6,18 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
-const completion = await openai.chat.completions.create({
-  model: "gpt-4",
-  messages: [
-    { role: "system", content: "You are a helpful assistant." },
-    {
-      role: "user",
-      content: "What is the capital of France?",
-    },
-  ],
-});
 
-console.log(completion.choices[0].message);
-export default completion;
+export default async function getCompletion({ message }: { message: string }) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: [
+      { role: "system", content: "You are a helpful assistant." },
+      {
+        role: "user",
+        content: message
+      },
+    ],
+  });
+
+  return completion
+}

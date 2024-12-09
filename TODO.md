@@ -7,8 +7,8 @@
 - [ ] Set up state management for messages
 
 ## 2. Basic Functionality
-- [ ] Implement message input field
-- [ ] Create send message function
+- [x] Implement message input field
+- [x] Create send message function
 - [ ] Display messages in UI
 - [ ] Add basic styling for user vs AI messages
 - [ ] Implement loading state
