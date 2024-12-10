@@ -9,7 +9,7 @@
 ## 2. Basic Functionality
 - [x] Implement message input field
 - [x] Create send message function
-- [ ] Display messages in UI
+- [x] Display messages in UI
 - [ ] Add basic styling for user vs AI messages
 - [ ] Implement loading state
 

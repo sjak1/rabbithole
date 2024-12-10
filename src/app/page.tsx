@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <>
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4 flex flex-col">
         {messages.map((msg, index) => (
           <Card key={index} className={`mb-2 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
             <div>{msg.content}</div>
