@@ -1,10 +1,9 @@
 "use client";
 import { useState } from "react";
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import getCompletion from "./openai";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
+import { ChatInput } from "@/components/ChatInput";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,23 +22,29 @@ export default function Home() {
     setResponse({ role: 'assistant', content: aiMessage });
     setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
     setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: aiMessage }]);
+    setMessage("");
   }
 
   return (
-    <>
-      <ScrollArea className="flex-1 p-4 flex flex-col">
-        {messages.map((msg, index) => (
-          <Card key={index} className={`mb-2 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-            <div>{msg.content}</div>
-          </Card>
-        ))}
-      </ScrollArea>
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-col items-center justify-center">
-          <Input type="text" className="w-full md:w-1/2" value={message} onChange={(e) => setMessage(e.target.value)} />
-          <Button type="submit" variant="outline">Send</Button>
+    <div className="h-screen flex flex-col p-4">
+      <div className="flex-1 mb-4">
+        <div className="space-y-4">
+          {messages.map((msg, index) => (
+            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <Card className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                <div className="whitespace-pre-wrap">{msg.content}</div>
+              </Card>
+            </div>
+          ))}
         </div>
-      </form>
-    </>
+      </div>
+      <div className="sticky">
+        <ChatInput
+          message={message}
+          setMessage={setMessage}
+          onSubmit={handleSubmit}
+        />
+      </div>
+    </div>
   );
 }
