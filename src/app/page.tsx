@@ -4,10 +4,13 @@ import getCompletion from "./openai";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { ChatInput } from "@/components/ChatInput";
+import { v4 as uuidv4 } from 'uuid';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  id: string;
+  parentId: string | null;
 }
 
 export default function Home() {
@@ -19,9 +22,9 @@ export default function Home() {
     e.preventDefault();
     const completion = await getCompletion({ messages: [...messages, { role: 'user', content: message }] });
     const aiMessage = completion.choices[0].message.content ?? "No response";
-    setResponse({ role: 'assistant', content: aiMessage });
-    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
-    setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: aiMessage }]);
+    setResponse({ role: 'assistant', content: aiMessage, id: uuidv4(), parentId: null });
+    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message, id: uuidv4(), parentId: null }]);
+    setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: aiMessage, id: uuidv4(), parentId: null }]);
     setMessage("");
   }
 
