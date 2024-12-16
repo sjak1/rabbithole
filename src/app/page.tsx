@@ -5,6 +5,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Card } from "@/components/ui/card"
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from "@/components/ui/button";
+import { ArrowRightIcon } from "lucide-react";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -28,6 +30,10 @@ export default function Home() {
     setMessage("");
   }
 
+  function handleBranchOut() {
+
+  }
+
   return (
     <div className="h-screen flex flex-col p-4">
       <div className="flex-1 mb-4">
@@ -46,6 +52,7 @@ export default function Home() {
           message={message}
           setMessage={setMessage}
           onSubmit={handleSubmit}
+          onBranchOut={handleBranchOut}
         />
       </div>
     </div>
