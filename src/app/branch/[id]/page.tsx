@@ -1,42 +1,50 @@
 "use client";
-import { useState, useEffect } from "react";
-import getCompletion from "../../openai";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import getCompletion from "@/app/openai";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card } from "@/components/ui/card"
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
-import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ArrowRightIcon } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+
 
 interface Message {
     role: 'user' | 'assistant';
     content: string;
-    id: string;
-    parentId: string | null;
 }
 
-export default function BranchPage() {
+export default function Home() {
     const [message, setMessage] = useState("");
-    const [response, setResponse] = useState<Message | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const params = useParams();
+    const branchId = params?.id as string;
 
-    // You can use this to load the parent conversation context
-    useEffect(() => {
-        // Load parent conversation context if needed
-    }, []);
+    const router = useRouter();
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const completion = await getCompletion({ messages: [...messages, { role: 'user', content: message }] });
+
+        const completion = await getCompletion({
+            messages: [...messages, { role: 'user', content: message }]
+        });
         const aiMessage = completion.choices[0].message.content ?? "No response";
-        setResponse({ role: 'assistant', content: aiMessage, id: uuidv4(), parentId: params.id as string });
-        setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message, id: uuidv4(), parentId: params.id as string }]);
-        setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: aiMessage, id: uuidv4(), parentId: params.id as string }]);
+
+        // Add both messages in a single update
+        setMessages(prevMessages => [
+            ...prevMessages,
+            { role: 'user', content: message },
+            { role: 'assistant', content: aiMessage }
+        ]);
+
         setMessage("");
     }
 
     function handleBranchOut() {
-        console.log("BranchOut");
+        router.push(`/branch/${uuidv4()}`);
     }
+
 
     return (
         <div className="h-screen flex flex-col p-4">

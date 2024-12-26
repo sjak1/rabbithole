@@ -7,32 +7,43 @@ import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  id: string;
-  parentId: string | null;
 }
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState<Message | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [branchId] = useState(uuidv4());
+
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const completion = await getCompletion({ messages: [...messages, { role: 'user', content: message }] });
+
+    const completion = await getCompletion({
+      messages: [...messages, { role: 'user', content: message }]
+    });
     const aiMessage = completion.choices[0].message.content ?? "No response";
-    setResponse({ role: 'assistant', content: aiMessage, id: uuidv4(), parentId: null });
-    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: message, id: uuidv4(), parentId: null }]);
-    setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: aiMessage, id: uuidv4(), parentId: null }]);
+
+    // Add both messages in a single update
+    setMessages(prevMessages => [
+      ...prevMessages,
+      { role: 'user', content: message },
+      { role: 'assistant', content: aiMessage }
+    ]);
+
     setMessage("");
   }
 
   function handleBranchOut() {
-
+    router.push(`/branch/${branchId}`);
   }
+
 
   return (
     <div className="h-screen flex flex-col p-4">
