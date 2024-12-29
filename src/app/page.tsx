@@ -8,16 +8,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useStore } from "@/store/store";
 
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
 
 export default function Home() {
+  const { getMessagesForBranch, setMessagesForBranch, setBranchParent } = useStore();
+  const messages = getMessagesForBranch('main');
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [branchId] = useState(uuidv4());
 
   const router = useRouter();
@@ -30,18 +27,15 @@ export default function Home() {
     });
     const aiMessage = completion.choices[0].message.content ?? "No response";
 
-    // Add both messages in a single update
-    setMessages(prevMessages => [
-      ...prevMessages,
-      { role: 'user', content: message },
-      { role: 'assistant', content: aiMessage }
-    ]);
+    setMessagesForBranch('main', [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
 
-    setMessage("");
   }
 
   function handleBranchOut() {
-    router.push(`/branch/${branchId}`);
+    const newBranchId = uuidv4();
+    setMessagesForBranch(branchId, messages);
+    setBranchParent(newBranchId, branchId);
+    router.push(`/branch/${newBranchId}`);
   }
 
 

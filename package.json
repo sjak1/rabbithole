@@ -25,7 +25,8 @@
     "reactflow": "^11.11.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^11.0.3"
+    "uuid": "^11.0.3",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",

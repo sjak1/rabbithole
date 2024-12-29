@@ -8,43 +8,37 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { ArrowRightIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-
-
-interface Message {
-    role: 'user' | 'assistant';
-    content: string;
-}
+import { useStore } from "@/store/store";
 
 export default function Home() {
+    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent } = useStore();
     const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<Message[]>([]);
     const params = useParams();
     const branchId = params?.id as string;
 
     const router = useRouter();
 
+    const parentBranchId = getBranchParent(branchId);
+    const parentMessages = parentBranchId ? getMessagesForBranch(parentBranchId) : [];
+    const messages = getMessagesForBranch(branchId);
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
         const completion = await getCompletion({
-            messages: [...messages, { role: 'user', content: message }]
+            messages: [...parentMessages, ...messages, { role: 'user', content: message }]
         });
         const aiMessage = completion.choices[0].message.content ?? "No response";
 
-        // Add both messages in a single update
-        setMessages(prevMessages => [
-            ...prevMessages,
-            { role: 'user', content: message },
-            { role: 'assistant', content: aiMessage }
-        ]);
-
-        setMessage("");
+        setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
     }
 
     function handleBranchOut() {
-        router.push(`/branch/${uuidv4()}`);
+        const newBranchId = uuidv4();
+        setMessagesForBranch(branchId, messages);
+        setBranchParent(newBranchId, branchId);
+        router.push(`/branch/${newBranchId}`);
     }
-
 
     return (
         <div className="h-screen flex flex-col p-4">
