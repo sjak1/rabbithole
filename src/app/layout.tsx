@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "../components/topnav";
+import '@xyflow/react/dist/style.css';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
