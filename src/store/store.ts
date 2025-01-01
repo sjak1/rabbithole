@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from 'zustand/middleware';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -14,21 +15,28 @@ interface Store {
     getBranchParent: (branchId: string) => string | null;
 }
 
-export const useStore = create<Store>((set, get) => ({
-    messagesByBranch: {},
-    branchParents: {},
-    setMessagesForBranch: (branchId, messages) => set(state => ({
-        messagesByBranch: {
-            ...state.messagesByBranch,
-            [branchId]: messages
+export const useStore = create<Store>()(
+    persist(
+        (set, get) => ({
+            messagesByBranch: {},
+            branchParents: {},
+            setMessagesForBranch: (branchId, messages) => set(state => ({
+                messagesByBranch: {
+                    ...state.messagesByBranch,
+                    [branchId]: messages
+                }
+            })),
+            setBranchParent: (branchId, parentId) => set(state => ({
+                branchParents: {
+                    ...state.branchParents,
+                    [branchId]: parentId
+                }
+            })),
+            getBranchParent: (branchId) => get().branchParents[branchId] || null,
+            getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || []
+        }),
+        {
+            name: 'chat-storage',
         }
-    })),
-    setBranchParent: (branchId, parentId) => set(state => ({
-        branchParents: {
-            ...state.branchParents,
-            [branchId]: parentId
-        }
-    })),
-    getBranchParent: (branchId) => get().branchParents[branchId] || null,
-    getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || []
-}));
+    )
+);

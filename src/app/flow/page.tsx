@@ -15,8 +15,7 @@ export default function FlowPage() {
     const nodes = Object.keys(messagesByBranch).map((branchId, index) => ({
         id: branchId,
         position: { x: 500, y: index * 150 },
-        data: { label: `Branch ${branchId.slice(0, 4)}...` },
-        url: `/branch/${branchId}`,
+        data: { label: `Branch ${branchId.slice(0, 4)}...`, url: `/branch/${branchId}` },
     }));
 
     // Create edges based on branch parents
@@ -33,7 +32,7 @@ export default function FlowPage() {
                 edges={edges}
                 fitView
                 onNodeClick={(event, node) => {
-                    window.location.href = node.url;
+                    window.location.href = `/branch/${node.id}`;
                 }}
             >
                 <Controls />
