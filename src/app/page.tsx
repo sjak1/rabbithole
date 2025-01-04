@@ -10,8 +10,8 @@ import { ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
 
-
 export default function Home() {
+
   const { getMessagesForBranch, setMessagesForBranch, setBranchParent } = useStore();
   const messages = getMessagesForBranch('main');
   const [message, setMessage] = useState("");
@@ -27,7 +27,7 @@ export default function Home() {
     });
     const aiMessage = completion.choices[0].message.content ?? "No response";
 
-    setMessagesForBranch('main', [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
+    setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
 
   }
 

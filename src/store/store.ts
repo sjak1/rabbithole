@@ -37,6 +37,8 @@ export const useStore = create<Store>()(
         }),
         {
             name: 'chat-storage',
+            skipHydration: true,
         }
     )
 );
+

@@ -9,6 +9,7 @@ import { useStore } from "@/store/store";
 import '@xyflow/react/dist/style.css';
 
 export default function FlowPage() {
+
     const { messagesByBranch, branchParents } = useStore();
 
     // Convert your chat branches to nodes and edges

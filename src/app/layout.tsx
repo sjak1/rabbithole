@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import TopNav from "../components/topnav";
 import '@xyflow/react/dist/style.css';
+import { StoreInitializer } from "@/components/StoreInitializer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
         </div>
         <div className="flex w-full">
           <div className="flex-1 max-w-4xl mx-auto">
+            <StoreInitializer />
             {children}
           </div>
         </div>
