@@ -13,6 +13,7 @@ interface Store {
     getMessagesForBranch: (branchId: string) => Message[];
     setBranchParent: (branchId: string, parentId: string) => void;
     getBranchParent: (branchId: string) => string | null;
+    deleteBranch: (branchId: string) => void;
 }
 
 export const useStore = create<Store>()(
@@ -33,7 +34,15 @@ export const useStore = create<Store>()(
                 }
             })),
             getBranchParent: (branchId) => get().branchParents[branchId] || null,
-            getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || []
+            getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || [],
+            deleteBranch: (branchId) => set(state => {
+                const { [branchId]: _messages, ...rest } = state.messagesByBranch;
+                const { [branchId]: _parent, ...rest2 } = state.branchParents;
+                return {
+                    messagesByBranch: rest,
+                    branchParents: rest2
+                }
+            })
         }),
         {
             name: 'chat-storage',
