@@ -40,7 +40,7 @@ export default function Home() {
 
 
   return (
-    <div className="h-screen flex flex-col p-4">
+    <div className="flex flex-col p-4">
       <div className="flex-1 mb-4">
         <div className="space-y-4">
           {messages.map((msg, index) => (
@@ -52,12 +52,13 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <div className="sticky">
+      <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">
         <ChatInput
           message={message}
           setMessage={setMessage}
           onSubmit={handleSubmit}
           onBranchOut={handleBranchOut}
+        //deleteBranch={deleteBranch}
         />
       </div>
     </div>

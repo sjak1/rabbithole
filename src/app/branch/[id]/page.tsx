@@ -42,8 +42,8 @@ export default function Home() {
     }
 
     return (
-        <div className="h-screen flex flex-col p-4">
-            <div className="flex-1 mb-4">
+        <div className="h-screen flex flex-col p-9">
+            <div className="flex-1 mb-4 pb-36">
                 <div className="space-y-4">
                     {messages.map((msg, index) => (
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -54,7 +54,7 @@ export default function Home() {
                     ))}
                 </div>
             </div>
-            <div className="sticky">
+            <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6 bg-white ">
                 <ChatInput
                     message={message}
                     setMessage={setMessage}
