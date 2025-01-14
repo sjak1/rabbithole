@@ -12,7 +12,7 @@ import { useStore } from "@/store/store";
 
 export default function Home() {
 
-  const { getMessagesForBranch, setMessagesForBranch, setBranchParent } = useStore();
+  const { getMessagesForBranch, setMessagesForBranch, setBranchParent, deleteBranch } = useStore();
   const messages = getMessagesForBranch('main');
   const [message, setMessage] = useState("");
   const [branchId] = useState(uuidv4());
@@ -28,7 +28,8 @@ export default function Home() {
     const aiMessage = completion.choices[0].message.content ?? "No response";
 
     setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
-
+    setMessage("");
+    router.push(`/branch/${branchId}`);
   }
 
   function handleBranchOut() {
@@ -38,6 +39,10 @@ export default function Home() {
     router.push(`/branch/${newBranchId}`);
   }
 
+  async function handleDeleteBranch() {
+    await deleteBranch(branchId);
+    router.push('/');
+  }
 
   return (
     <div className="flex flex-col p-4">
@@ -58,7 +63,7 @@ export default function Home() {
           setMessage={setMessage}
           onSubmit={handleSubmit}
           onBranchOut={handleBranchOut}
-        //deleteBranch={deleteBranch}
+          deleteBranch={handleDeleteBranch}
         />
       </div>
     </div>

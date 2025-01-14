@@ -12,7 +12,7 @@ import { useStore } from "@/store/store";
 
 export default function Home() {
 
-    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent } = useStore();
+    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent, deleteBranch } = useStore();
     const [message, setMessage] = useState("");
     const params = useParams();
     const branchId = params?.id as string;
@@ -41,6 +41,11 @@ export default function Home() {
         router.push(`/branch/${newBranchId}`);
     }
 
+    async function handleDeleteBranch() {
+        await deleteBranch(branchId);
+        router.push('/');
+    }
+
     return (
         <div className="h-screen flex flex-col p-9">
             <div className="flex-1 mb-4 pb-36">
@@ -60,6 +65,7 @@ export default function Home() {
                     setMessage={setMessage}
                     onSubmit={handleSubmit}
                     onBranchOut={handleBranchOut}
+                    deleteBranch={handleDeleteBranch}
                 />
             </div>
         </div>

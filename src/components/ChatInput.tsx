@@ -6,9 +6,10 @@ interface ChatInputProps {
     setMessage: (message: string) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     onBranchOut: () => void;
+    deleteBranch: () => void;
 }
 
-export function ChatInput({ message, setMessage, onSubmit, onBranchOut }: ChatInputProps) {
+export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBranch }: ChatInputProps) {
     return (
         <div >
             <div className="max-w-4xl mx-auto px-4">
@@ -22,7 +23,8 @@ export function ChatInput({ message, setMessage, onSubmit, onBranchOut }: ChatIn
                             placeholder="Type your message..."
                         />
                         <Button type="submit" variant="outline" className="h-12">Send</Button>
-                        <Button variant="outline" className="h-12" onClick={onBranchOut}>BranchOut</Button>
+                        <Button type="button" variant="outline" className="h-12" onClick={onBranchOut}>BranchOut</Button>
+                        <Button type="button" variant="outline" className="h-12" onClick={deleteBranch}>Delete</Button>
                     </div>
                 </form>
                 <footer className="text-center text-sm text-zinc-500">

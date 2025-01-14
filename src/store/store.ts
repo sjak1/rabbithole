@@ -13,7 +13,7 @@ interface Store {
     getMessagesForBranch: (branchId: string) => Message[];
     setBranchParent: (branchId: string, parentId: string) => void;
     getBranchParent: (branchId: string) => string | null;
-    deleteBranch: (branchId: string) => void;
+    deleteBranch: (branchId: string) => Promise<void>;
 }
 
 export const useStore = create<Store>()(
@@ -35,13 +35,16 @@ export const useStore = create<Store>()(
             })),
             getBranchParent: (branchId) => get().branchParents[branchId] || null,
             getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || [],
-            deleteBranch: (branchId) => set(state => {
-                const { [branchId]: _messages, ...rest } = state.messagesByBranch;
-                const { [branchId]: _parent, ...rest2 } = state.branchParents;
-                return {
-                    messagesByBranch: rest,
-                    branchParents: rest2
-                }
+            deleteBranch: (branchId) => new Promise(resolve => {
+                set(state => {
+                    const { [branchId]: _messages, ...rest } = state.messagesByBranch;
+                    const { [branchId]: _parent, ...rest2 } = state.branchParents;
+                    return {
+                        messagesByBranch: rest,
+                        branchParents: rest2
+                    }
+                })
+                resolve();
             })
         }),
         {
