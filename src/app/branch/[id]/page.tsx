@@ -50,71 +50,54 @@ export default function Home() {
     return (
         <div className="flex flex-col p-4 max-w-4xl mx-auto">
             <div className="flex-1 mb-4 pb-36">
-                <div className="space-y-6">
+                <div className="space-y-8">
                     {messages.map((msg, index) => (
                         <div
                             key={index}
-                            className={`flex items-end gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                            className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             {msg.role === 'assistant' && (
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm">
-                                    AI
-                                </div>
+                                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300 transition-all duration-200 group-hover:bg-zinc-400" />
                             )}
 
                             <div
                                 className={`
                                     group flex flex-col max-w-[80%] 
-                                    ${msg.role === 'user'
-                                        ? 'items-end'
-                                        : 'items-start'
-                                    }
+                                    ${msg.role === 'user' ? 'items-end' : 'items-start'}
                                 `}
                             >
                                 <div
                                     className={`
-                                        relative px-4 py-3 rounded-2xl shadow-sm
+                                        relative px-5 py-3 rounded-md
                                         ${msg.role === 'user'
-                                            ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-none'
-                                            : 'bg-white border border-gray-200 rounded-bl-none'
+                                            ? 'bg-zinc-900 text-zinc-50'
+                                            : 'bg-zinc-50 border-l-2 border-zinc-200'
                                         }
+                                        shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]
+                                        hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)]
+                                        transition-all duration-200 ease-in-out
+                                        hover:translate-x-[-1px] hover:translate-y-[-1px]
                                     `}
                                 >
-                                    <div className="whitespace-pre-wrap">{msg.content}</div>
-
-                                    {/* Message tail */}
-                                    <div
-                                        className={`
-                                            absolute bottom-0 w-4 h-4 
-                                            ${msg.role === 'user'
-                                                ? 'right-0 bg-blue-600'
-                                                : 'left-0 bg-white border-l border-b border-gray-200'
-                                            }
-                                            transform translate-y-[30%]
-                                            ${msg.role === 'user'
-                                                ? 'rounded-bl-2xl'
-                                                : 'rounded-tr-2xl'
-                                            }
-                                        `}
-                                    />
+                                    <div className="whitespace-pre-wrap">
+                                        {msg.content}
+                                    </div>
                                 </div>
 
                                 {/* Timestamp */}
-                                <span className="text-xs text-gray-400 mt-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* <span className="text-xs text-zinc-400 mt-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                                </span> */}
                             </div>
 
                             {msg.role === 'user' && (
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white text-sm">
-                                    You
-                                </div>
+                                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-400 transition-all duration-200 group-hover:bg-zinc-600" />
                             )}
                         </div>
                     ))}
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-zinc-200 py-4">
+            <div className="fixed bottom-0 left-0 right-0 bg-zinc-50/90 backdrop-blur-sm border-t border-zinc-200 py-4">
                 <div className="max-w-4xl mx-auto px-4">
                     <ChatInput
                         message={message}
