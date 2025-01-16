@@ -32,6 +32,7 @@ export default function Home() {
         const aiMessage = completion.choices[0].message.content ?? "No response";
 
         setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
+        setMessage("");
     }
 
     function handleBranchOut() {

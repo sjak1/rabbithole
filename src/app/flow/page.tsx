@@ -12,10 +12,44 @@ export default function FlowPage() {
 
     const { messagesByBranch, branchParents } = useStore();
 
-    // Convert your chat branches to nodes and edges
-    const nodes = Object.keys(messagesByBranch).map((branchId, index) => ({
+    // Group branches by their parent
+    const childrenByParent: Record<string, string[]> = {};
+    Object.entries(branchParents).forEach(([branchId, parentId]) => {
+        if (!childrenByParent[parentId]) {
+            childrenByParent[parentId] = [];
+        }
+        childrenByParent[parentId].push(branchId);
+    });
+
+    // Calculate node positions
+    const nodePositions: Record<string, { x: number, y: number }> = {};
+    const baseRadius = 400; // Distance from parent
+
+    // Position root nodes (nodes without parents)
+    const rootNodes = Object.keys(messagesByBranch).filter(id => !branchParents[id]);
+    rootNodes.forEach((id, i) => {
+        nodePositions[id] = { x: i * 500, y: 100 };
+    });
+
+    // Position child nodes
+    Object.entries(childrenByParent).forEach(([parentId, children]) => {
+        const parentPos = nodePositions[parentId] || { x: 0, y: 0 };
+
+        children.forEach((childId, index) => {
+            // Calculate angle based on number of siblings
+            const angle = (Math.PI / Math.max(1, children.length + 1)) * (index + 1);
+
+            nodePositions[childId] = {
+                x: parentPos.x + Math.cos(angle) * baseRadius,
+                y: parentPos.y + Math.sin(angle) * baseRadius
+            };
+        });
+    });
+
+    // Create nodes with calculated positions
+    const nodes = Object.keys(messagesByBranch).map((branchId) => ({
         id: branchId,
-        position: { x: 500, y: index * 150 },
+        position: nodePositions[branchId] || { x: 0, y: 0 },
         data: { label: `Branch ${branchId.slice(0, 4)}...`, url: `/branch/${branchId}` },
     }));
 
