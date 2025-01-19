@@ -45,27 +45,29 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col p-4">
-      <div className="flex-1 mb-4">
-        <div className="space-y-4">
-          {messages.map((msg, index) => (
-            <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <Card className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                <div className="whitespace-pre-wrap">{msg.content}</div>
-              </Card>
-            </div>
-          ))}
+    <>
+      <div className="flex flex-col p-4">
+        <div className="flex-1 mb-4">
+          <div className="space-y-4">
+            {messages.map((msg, index) => (
+              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <Card className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                </Card>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">
+          <ChatInput
+            message={message}
+            setMessage={setMessage}
+            onSubmit={handleSubmit}
+            onBranchOut={handleBranchOut}
+            deleteBranch={handleDeleteBranch}
+          />
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">
-        <ChatInput
-          message={message}
-          setMessage={setMessage}
-          onSubmit={handleSubmit}
-          onBranchOut={handleBranchOut}
-          deleteBranch={handleDeleteBranch}
-        />
-      </div>
-    </div>
+    </>
   );
 }

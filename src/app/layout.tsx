@@ -4,6 +4,7 @@ import "./globals.css";
 import TopNav from "../components/topnav";
 import '@xyflow/react/dist/style.css';
 import { StoreInitializer } from "@/components/StoreInitializer";
+import SideNav from "@/components/SideNav";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <TopNav />
         </div>
         <div className="flex w-full">
+          <SideNav />
           <div className="flex-1 max-w-4xl mx-auto">
             <StoreInitializer />
             {children}

@@ -42,3 +42,4 @@ next-env.d.ts
 
 # fun
 src/fun.js
+src/app/test/page.tsx
