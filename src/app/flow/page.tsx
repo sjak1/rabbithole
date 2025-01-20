@@ -51,6 +51,16 @@ export default function FlowPage() {
         id: branchId,
         position: nodePositions[branchId] || { x: 0, y: 0 },
         data: { label: `Branch ${branchId.slice(0, 4)}...`, url: `/branch/${branchId}` },
+        style: {
+            background: 'linear-gradient(to bottom right, #ffffff, #f0f9ff)',
+            border: '2px solid #3b82f6',
+            borderRadius: '12px',
+            padding: '12px',
+            width: 180,
+            boxShadow: '0 4px 15px -3px rgba(59, 130, 246, 0.2)',
+            transition: 'all 0.2s ease',
+            cursor: 'pointer',
+        },
     }));
 
     // Create edges based on branch parents
