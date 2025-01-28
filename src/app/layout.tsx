@@ -36,7 +36,7 @@ export default function RootLayout({
           <TopNav />
         </div>
         <div className="flex w-full">
-          <SideNav />
+          {/* <SideNav /> */}
           <div className="flex-1 max-w-4xl mx-auto">
             <StoreInitializer />
             {children}
