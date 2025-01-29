@@ -5,7 +5,8 @@ import {
     Controls,
     Background,
     useNodesState,
-    useEdgesState
+    useEdgesState,
+    BackgroundVariant
 } from '@xyflow/react';
 import { useStore } from "@/store/store";
 import '@xyflow/react/dist/style.css';
@@ -101,7 +102,7 @@ export default function FlowPage() {
             >
                 <Controls />
                 <MiniMap />
-                <Background variant="dots" gap={12} size={1} />
+                <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
             </ReactFlow>
         </div>
     );
