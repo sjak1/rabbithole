@@ -27,7 +27,7 @@ export default function TopNav() {
                             Explore
                         </Link>
                         <a
-                            href="https://github.com/yourusername/rabbithole"
+                            href="https://github.com/sjak1/rabbithole"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-all"
