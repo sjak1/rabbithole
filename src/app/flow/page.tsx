@@ -5,17 +5,55 @@ import {
     Controls,
     Background,
     useNodesState,
-    useEdgesState,
-    BackgroundVariant
+    useEdgesState
 } from '@xyflow/react';
 import { useStore } from "@/store/store";
 import '@xyflow/react/dist/style.css';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { BackgroundVariant } from '@xyflow/react';
+import { getBranchTitle } from "@/app/openai";
 
 export default function FlowPage() {
     const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
+    const {
+        messagesByBranch,
+        branchParents,
+        branchTitles,
+        setBranchTitle
+    } = useStore();
+    const processedBranches = useRef<Set<string>>(new Set());
 
-    const { messagesByBranch, branchParents } = useStore();
+    // Process only new branches
+    useEffect(() => {
+        const processNewBranches = async () => {
+            const newBranches = Object.entries(messagesByBranch)
+                .filter(([branchId]) =>
+                    !processedBranches.current.has(branchId) &&
+                    !branchTitles[branchId]
+                );
+
+            if (newBranches.length === 0) return;
+
+            for (const [branchId, messages] of newBranches) {
+                // Mark as processed immediately
+                processedBranches.current.add(branchId);
+
+                if (messages.length >= 2) {
+                    try {
+                        const title = await getBranchTitle(messages);
+                        setBranchTitle(branchId, title);
+                    } catch (error) {
+                        console.error(`Error loading title for branch ${branchId}:`, error);
+                        setBranchTitle(branchId, `Branch ${branchId.slice(0, 4)}...`);
+                    }
+                } else {
+                    setBranchTitle(branchId, `New Branch ${branchId.slice(0, 4)}...`);
+                }
+            }
+        };
+
+        processNewBranches();
+    }, [messagesByBranch, branchTitles, setBranchTitle]);
 
     const { initialNodes, initialEdges } = useMemo(() => {
 
@@ -38,6 +76,7 @@ export default function FlowPage() {
             nodePositions[id] = { x: i * 800, y: 0 };
         });
 
+
         // Position child nodes
         Object.entries(childrenByParent).forEach(([parentId, children]) => {
             const parentPos = nodePositions[parentId] || { x: 0, y: 0 };
@@ -57,7 +96,10 @@ export default function FlowPage() {
         const nodes = Object.keys(messagesByBranch).map((branchId) => ({
             id: branchId,
             position: nodePositions[branchId] || { x: 0, y: 0 },
-            data: { label: `Branch ${branchId.slice(0, 4)}...`, url: `/branch/${branchId}` },
+            data: {
+                label: branchTitles[branchId] || `New Branch`,
+                url: `/branch/${branchId}`
+            },
             style: {
                 background: '#f0f9ff',
                 border: '2px solid #3b82f6',
@@ -76,7 +118,7 @@ export default function FlowPage() {
 
         return { initialNodes: nodes, initialEdges: edges };
 
-    }, [messagesByBranch, branchParents]);
+    }, [messagesByBranch, branchParents, branchTitles]);
 
 
 
