@@ -1,6 +1,6 @@
-# Chat Branch Visualizer
+# 🕳️ Rabbit Hole
 
-A Next.js application that provides an interactive visualization of chat conversations with branching capabilities. Think of it as a "multiverse of conversations" where each chat can branch into different directions.
+A chat application that lets you explore alternate conversation paths, like diving down different rabbit holes. Create branches at any point in a conversation to explore "what if" scenarios, with an interactive visualization of your conversation multiverse.
 
 ## Features
 
