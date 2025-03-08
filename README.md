@@ -7,8 +7,6 @@ A chat application that lets you explore alternate conversation paths, like divi
 - 🌳 Visual branch navigation using React Flow
 - 💬 Organized chat conversations in branches
 - 🤖 AI-powered branch title generation
-- 🔄 Real-time updates
-- 📱 Responsive design
 
 ## Prerequisites
 
