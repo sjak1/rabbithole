@@ -48,7 +48,7 @@ export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBr
                     </div>
                 </form>
                 <footer className="text-center text-sm text-zinc-500 mt-4">
-                    Built with <span className="text-red-400">❤️</span> by aditya <a href="https://github.com/yourusername" className="text-zinc-600 hover:text-zinc-800 transition-colors underline">GitHub</a>
+                    Built with <span className="text-red-400">❤️</span> by aditya <a href="https://github.com/sjak1" className="text-zinc-600 hover:text-zinc-800 transition-colors underline">GitHub</a>
                 </footer>
             </div>
         </div>
