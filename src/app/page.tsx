@@ -1,14 +1,11 @@
 "use client";
 import { useState } from "react";
 import getCompletion from "./openai";
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card } from "@/components/ui/card"
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
-import { Button } from "@/components/ui/button";
-import { ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
+
 
 export default function Home() {
 
@@ -22,14 +19,24 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    const updatedMessages = [...messages, { role: 'user' as const, content: message }];
+    setMessagesForBranch(branchId, updatedMessages);
+
+    // Force React to process the first update
+    await Promise.resolve();
+
     const completion = await getCompletion({
-      messages: [...messages, { role: 'user', content: message }]
+      messages: updatedMessages
     });
     const aiMessage = completion.choices[0].message.content ?? "No response";
 
-    setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
+    setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
     setMessage("");
-    router.push(`/branch/${branchId}`);
+
+    // Only navigate if we're on the main page (first message in a new branch)
+    if (window.location.pathname === '/') {
+      router.push(`/branch/${branchId}`);
+    }
   }
 
   function handleBranchOut() {
@@ -49,13 +56,17 @@ export default function Home() {
       <div className="flex flex-col p-4">
         <div className="flex-1 mb-4">
           <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <Card className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
-                </Card>
-              </div>
-            ))}
+            {messages.map((msg, index) => {
+              return (
+                <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                    <div >
+                      {msg.content}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">
