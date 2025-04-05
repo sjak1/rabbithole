@@ -26,13 +26,19 @@ export default function Home() {
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const completion = await getCompletion({
-            messages: [...parentMessages, ...messages, { role: 'user', content: message }]
-        });
-        const aiMessage = completion.choices[0].message.content ?? "No response";
-
-        setMessagesForBranch(branchId, [...messages, { role: 'user', content: message }, { role: 'assistant', content: aiMessage }]);
+        // Add the user's message and clear the input
+        const updatedMessages = [...messages, { role: 'user' as const, content: message }];
+        setMessagesForBranch(branchId, updatedMessages);
         setMessage("");
+
+        // Delay the AI call to let the user message render first
+        setTimeout(async () => {
+            const completion = await getCompletion({
+                messages: [...parentMessages, ...updatedMessages]  // Include parent messages for context
+            });
+            const aiMessage = completion.choices[0].message.content ?? "No response";
+            setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
+        }, 0);
     }
 
     function handleBranchOut() {

@@ -19,24 +19,24 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    // Add the user's message and clear the input
     const updatedMessages = [...messages, { role: 'user' as const, content: message }];
     setMessagesForBranch(branchId, updatedMessages);
-
-    // Force React to process the first update
-    await Promise.resolve();
-
-    const completion = await getCompletion({
-      messages: updatedMessages
-    });
-    const aiMessage = completion.choices[0].message.content ?? "No response";
-
-    setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
     setMessage("");
 
-    // Only navigate if we're on the main page (first message in a new branch)
-    if (window.location.pathname === '/') {
-      router.push(`/branch/${branchId}`);
-    }
+    // Delay the AI call to let the user message render first
+    setTimeout(async () => {
+      const completion = await getCompletion({
+        messages: updatedMessages
+      });
+      const aiMessage = completion.choices[0].message.content ?? "No response";
+      setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
+
+      // Navigate if on the main page (first message in a new branch)
+      if (window.location.pathname === '/') {
+        router.push(`/branch/${branchId}`);
+      }
+    }, 0);
   }
 
   function handleBranchOut() {
