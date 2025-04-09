@@ -1,14 +1,11 @@
 "use client";
 import { useState } from "react";
 import getCompletion from "@/app/openai";
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card } from "@/components/ui/card"
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
-import { Button } from "@/components/ui/button";
-import { ArrowRightIcon } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
 
@@ -72,8 +69,8 @@ export default function Home() {
                                     ${msg.role === 'user' ? 'items-end' : 'items-start'}
                                 `}
                             >
-                                <div
-                                    className={`
+                            <div
+                                className={`
                                         relative px-5 py-3 rounded-md
                                         ${msg.role === 'user'
                                             ? 'bg-zinc-900 text-zinc-50'
@@ -86,9 +83,9 @@ export default function Home() {
                                     `}
                                 >
                                     <div className="whitespace-pre-wrap">
-                                        {msg.content}
+                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
                                     </div>
-                                </div>
+                            </div>
 
                                 {/* Timestamp */}
                                 {/* <span className="text-xs text-zinc-400 mt-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity">

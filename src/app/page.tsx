@@ -5,7 +5,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
-
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
 
@@ -61,7 +61,7 @@ export default function Home() {
                 <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
                     <div >
-                      {msg.content}
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   </div>
                 </div>
