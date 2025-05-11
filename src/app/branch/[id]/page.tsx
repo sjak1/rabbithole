@@ -23,7 +23,6 @@ export default function Home() {
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        // Add the user's message and clear the input
         const updatedMessages = [...messages, { role: 'user' as const, content: message }];
         setMessagesForBranch(branchId, updatedMessages);
         setMessage("");
@@ -41,7 +40,7 @@ export default function Home() {
     function handleBranchOut() {
         const newBranchId = uuidv4();
         setMessagesForBranch(branchId, messages);
-        setBranchParent(newBranchId, branchId);
+        setBranchParent(newBranchId, branchId);  // interchange those params positions;
         router.push(`/branch/${newBranchId}`);
     }
 
