@@ -5,6 +5,12 @@ export interface Message {
     content: string;
 }
 
+export type Branch = {
+  id: string;
+  name: string;
+  parentId?: string | null;
+};
+
 export const getMessages = async (branchId: string): Promise<Message[]> => {
     try {
         const response = await fetch(`${API_URL}/messages/${branchId}`);
@@ -40,6 +46,17 @@ export const setBranchParent = async (childId: string, parentId: string): Promis
     if (!response.ok) throw new Error('Failed to set branch parent')
   } catch (error) {
     console.error('Error setting branch parent:', error);
+    throw error;
+  }
+}
+
+export const getBranchParent = async (branchId: string): Promise<Branch | null>  => {
+  try{
+    const res = await fetch(`${API_URL}/parent/${branchId}`);
+    if(!response.ok) throw new Error('failed to fetch branch parent');
+    return respose.json()
+  } catch(error) {
+    console.error('error fetching branch parent : ', error);
     throw error;
   }
 }
