@@ -60,3 +60,16 @@ export const getBranchParent = async (branchId: string): Promise<Branch | null> 
     throw error;
   }
 }
+
+export const deleteBranch = async (branchId: string): Promise<void> => {
+  try{
+    const res = await fetch(`${API_URL}/${branchId}`);
+    if(!response.ok) throw new Error('failed to delete branch')
+    return response.json
+  } catch {
+    cosnole.error('Error deleting the branch', error);
+    throw error;
+  }
+}
+
+export const setBranchTitle = async()

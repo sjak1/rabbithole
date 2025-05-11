@@ -55,7 +55,11 @@ export const setBranchTitle = async (req: Request, res: Response) => {
     try {
         const { branchId } = req.params;
         const { title } = req.body;
-        res.json({ success: true, branchId, title });
+        const updatedBranch = await prisma.branch.update({
+            where: { id: branchId },
+            data: { name: title }
+        });
+        res.json(updatedBranch);
     } catch (err) {
         console.error('Error setting branch title:', err);
         res.status(500).json({ error: 'Failed to set branch title' });
