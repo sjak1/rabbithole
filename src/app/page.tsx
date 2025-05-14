@@ -1,26 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import getCompletion from "./openai";
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
 import ReactMarkdown from "react-markdown";
+import { Message } from "@/api";
 
 export default function Home() {
 
   const { getMessagesForBranch, setMessagesForBranch, setBranchParent, deleteBranch } = useStore();
-  const messages = getMessagesForBranch('main');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [branchId] = useState(uuidv4());
 
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    const loadMessages = async () => {
+      const fetchedMessages = await getMessagesForBranch(branchId);
+      setMessages(fetchedMessages);
+    };
+    loadMessages();
+  }, [branchId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
 
     // Add the user's message and clear the input
-    const updatedMessages = [...messages, { role: 'user' as const, content: message }];
+    const currentMessages = await getMessagesForBranch(branchId);
+    const updatedMessages = [...currentMessages, { role: 'user' as const, content: message }];
     setMessagesForBranch(branchId, updatedMessages);
     setMessage("");
 
@@ -37,11 +48,12 @@ export default function Home() {
         router.push(`/branch/${branchId}`);
       }
     }, 0);
-  }
+  };
 
-  function handleBranchOut() {
+  async function handleBranchOut() {
     const newBranchId = uuidv4();
-    setMessagesForBranch(branchId, messages);
+    const currentMessages = await getMessagesForBranch(branchId);
+    setMessagesForBranch(branchId, currentMessages);
     setBranchParent(newBranchId, branchId);
     router.push(`/branch/${newBranchId}`);
   }

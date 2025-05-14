@@ -37,39 +37,53 @@ export const setMessages = async (branchId: string, messages: Message[]): Promis
 };
 
 export const setBranchParent = async (childId: string, parentId: string): Promise<void> => {
-  try {
-    const response = await fetch(`${API_URL}/parent/${childId}`,{
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'}
-      body: JSON.stringify({childId,parentId})
-    })
-    if (!response.ok) throw new Error('Failed to set branch parent')
-  } catch (error) {
-    console.error('Error setting branch parent:', error);
-    throw error;
-  }
-}
+    try {
+        const response = await fetch(`${API_URL}/parent/${childId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ childId, parentId })
+        });
+        if (!response.ok) throw new Error('Failed to set branch parent');
+    } catch (error) {
+        console.error('Error setting branch parent:', error);
+        throw error;
+    }
+};
 
-export const getBranchParent = async (branchId: string): Promise<Branch | null>  => {
-  try{
-    const res = await fetch(`${API_URL}/parent/${branchId}`);
-    if(!response.ok) throw new Error('failed to fetch branch parent');
-    return respose.json()
-  } catch(error) {
-    console.error('error fetching branch parent : ', error);
-    throw error;
-  }
-}
+export const getBranchParent = async (branchId: string): Promise<Branch | null> => {
+    try {
+        const response = await fetch(`${API_URL}/parent/${branchId}`);
+        if (!response.ok) throw new Error('Failed to fetch branch parent');
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching branch parent:', error);
+        throw error;
+    }
+};
 
 export const deleteBranch = async (branchId: string): Promise<void> => {
-  try{
-    const res = await fetch(`${API_URL}/${branchId}`);
-    if(!response.ok) throw new Error('failed to delete branch')
-    return response.json
-  } catch {
-    cosnole.error('Error deleting the branch', error);
-    throw error;
-  }
-}
+    try {
+        const response = await fetch(`${API_URL}/branch/${branchId}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete branch');
+    } catch (error) {
+        console.error('Error deleting the branch:', error);
+        throw error;
+    }
+};
 
-export const setBranchTitle = async()
+export const setBranchTitle = async (branchId: string, title: string): Promise<void> => {
+    try {
+        const response = await fetch(`${API_URL}/title/${branchId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title })
+        });
+        if (!response.ok) throw new Error('Failed to set branch title');
+    } catch (error) {
+        console.error('Error setting branch title:', error);
+        throw error;
+    }
+};
+

@@ -35,19 +35,18 @@ export default function FlowPage() {
             if (newBranches.length === 0) return;
 
             for (const [branchId, messages] of newBranches) {
-                // Mark as processed immediately
                 processedBranches.current.add(branchId);
 
                 if (messages.length >= 2) {
                     try {
                         const title = await getBranchTitle(messages);
-                        setBranchTitle(branchId, title);
+                        await setBranchTitle(branchId, title);
                     } catch (error) {
                         console.error(`Error loading title for branch ${branchId}:`, error);
-                        setBranchTitle(branchId, `Branch ${branchId.slice(0, 4)}...`);
+                        await setBranchTitle(branchId, `Branch ${branchId.slice(0, 4)}...`);
                     }
                 } else {
-                    setBranchTitle(branchId, `New Branch ${branchId.slice(0, 4)}...`);
+                    await setBranchTitle(branchId, `New Branch ${branchId.slice(0, 4)}...`);
                 }
             }
         };
@@ -56,7 +55,6 @@ export default function FlowPage() {
     }, [messagesByBranch, branchTitles, setBranchTitle]);
 
     const { initialNodes, initialEdges } = useMemo(() => {
-
         // Group branches by their parent
         const childrenByParent: Record<string, string[]> = {};
         Object.entries(branchParents).forEach(([branchId, parentId]) => {
@@ -68,19 +66,17 @@ export default function FlowPage() {
 
         // Calculate node positions
         const nodePositions: Record<string, { x: number, y: number }> = {};
-        const baseRadius = 300; // Base distance from parent
+        const baseRadius = 300;
 
-        // Position root nodes (nodes without parents)
+        // Position root nodes
         const rootNodes = Object.keys(messagesByBranch).filter(id => !branchParents[id]);
         rootNodes.forEach((id, i) => {
             nodePositions[id] = { x: i * 800, y: 0 };
         });
 
-
         // Position child nodes
         Object.entries(childrenByParent).forEach(([parentId, children]) => {
             const parentPos = nodePositions[parentId] || { x: 0, y: 0 };
-            // Dynamic radius calculation using square root for better scaling
             const dynamicRadius = baseRadius + (Math.sqrt(children.length) * 100);
 
             children.forEach((childId, index) => {
@@ -92,7 +88,7 @@ export default function FlowPage() {
             });
         });
 
-        // Create nodes with calculated positions
+        // Create nodes
         const nodes = Object.keys(messagesByBranch).map((branchId) => ({
             id: branchId,
             position: nodePositions[branchId] || { x: 0, y: 0 },
@@ -109,7 +105,7 @@ export default function FlowPage() {
             },
         }));
 
-        // Create edges based on branch parents
+        // Create edges
         const edges = Object.entries(branchParents).map(([branchId, parentId]) => ({
             id: `${parentId}-${branchId}`,
             source: parentId,
@@ -117,10 +113,7 @@ export default function FlowPage() {
         }));
 
         return { initialNodes: nodes, initialEdges: edges };
-
     }, [messagesByBranch, branchParents, branchTitles]);
-
-
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);

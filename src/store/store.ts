@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
+import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle } from '../api';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -10,11 +11,11 @@ interface Store {
     messagesByBranch: Record<string, Message[]>;
     branchParents: Record<string, string>;
     branchTitles: Record<string, string>;
-    setMessagesForBranch: (branchId: string, messages: Message[]) => void;
-    getMessagesForBranch: (branchId: string) => Message[];
-    setBranchParent: (branchId: string, parentId: string) => void;
-    getBranchParent: (branchId: string) => string | null;
-    setBranchTitle: (branchId: string, title: string) => void;
+    setMessagesForBranch: (branchId: string, messages: Message[]) => Promise<void>;
+    getMessagesForBranch: (branchId: string) => Promise<Message[]>;
+    setBranchParent: (branchId: string, parentId: string) => Promise<void>;
+    getBranchParent: (branchId: string) => Promise<string | null>;
+    setBranchTitle: (branchId: string, title: string) => Promise<void>;
     getBranchTitle: (branchId: string) => string | null;
     deleteBranch: (branchId: string) => Promise<void>;
 }
@@ -25,28 +26,58 @@ export const useStore = create<Store>()(
             messagesByBranch: {},
             branchParents: {},
             branchTitles: {},
-            setMessagesForBranch: (branchId, messages) => set(state => ({
-                messagesByBranch: {
-                    ...state.messagesByBranch,
-                    [branchId]: messages
+            setMessagesForBranch: async (branchId, messages) => {
+                await setMessages(branchId, messages);
+                set(state => ({
+                    messagesByBranch: {
+                        ...state.messagesByBranch,
+                        [branchId]: messages
+                    }
+                }));
+            },
+            getMessagesForBranch: async (branchId) => {
+                const messages = await getMessages(branchId);
+                set(state => ({
+                    messagesByBranch: {
+                        ...state.messagesByBranch,
+                        [branchId]: messages
+                    }
+                }));
+                return messages;
+            },
+            setBranchParent: async (branchId, parentId) => {
+                await setBranchParent(branchId, parentId);
+                set(state => ({
+                    branchParents: {
+                        ...state.branchParents,
+                        [branchId]: parentId
+                    }
+                }));
+            },
+            getBranchParent: async (branchId) => {
+                const parent = await getBranchParent(branchId);
+                if (parent) {
+                    set(state => ({
+                        branchParents: {
+                            ...state.branchParents,
+                            [branchId]: parent.id
+                        }
+                    }));
                 }
-            })),
-            setBranchParent: (branchId, parentId) => set(state => ({
-                branchParents: {
-                    ...state.branchParents,
-                    [branchId]: parentId
-                }
-            })),
-            getBranchParent: (branchId) => get().branchParents[branchId] || null,
-            getMessagesForBranch: (branchId) => get().messagesByBranch[branchId] || [],
-            setBranchTitle: (branchId, title) => set(state => ({
-                branchTitles: {
-                    ...state.branchTitles,
-                    [branchId]: title
-                }
-            })),
+                return parent?.id || null;
+            },
+            setBranchTitle: async (branchId, title) => {
+                await setBranchTitle(branchId, title);
+                set(state => ({
+                    branchTitles: {
+                        ...state.branchTitles,
+                        [branchId]: title
+                    }
+                }));
+            },
             getBranchTitle: (branchId) => get().branchTitles[branchId] || null,
-            deleteBranch: (branchId) => new Promise(resolve => {
+            deleteBranch: async (branchId) => {
+                await deleteBranch(branchId);
                 set(state => {
                     const { [branchId]: _messages, ...restMessages } = state.messagesByBranch;
                     const { [branchId]: _parent, ...restParents } = state.branchParents;
@@ -56,9 +87,8 @@ export const useStore = create<Store>()(
                         branchParents: restParents,
                         branchTitles: restTitles
                     }
-                })
-                resolve();
-            })
+                });
+            }
         }),
         {
             name: 'chat-storage',

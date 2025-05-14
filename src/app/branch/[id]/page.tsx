@@ -1,46 +1,60 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import getCompletion from "@/app/openai";
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
 import ReactMarkdown from "react-markdown";
+import { Message } from "@/api";
 
 export default function Home() {
-
     const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent, deleteBranch } = useStore();
     const [message, setMessage] = useState("");
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [parentMessages, setParentMessages] = useState<Message[]>([]);
     const params = useParams();
     const branchId = params?.id as string;
-
     const router = useRouter();
 
-    const parentBranchId = getBranchParent(branchId);
-    const parentMessages = parentBranchId ? getMessagesForBranch(parentBranchId) : [];
-    const messages = getMessagesForBranch(branchId);
+    useEffect(() => {
+        const loadMessages = async () => {
+            const fetchedMessages = await getMessagesForBranch(branchId);
+            setMessages(fetchedMessages);
+
+            const parentId = await getBranchParent(branchId);
+            if (parentId) {
+                const fetchedParentMessages = await getMessagesForBranch(parentId);
+                setParentMessages(fetchedParentMessages);
+            }
+        };
+        loadMessages();
+    }, [branchId, getMessagesForBranch, getBranchParent]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        if (!message.trim()) return;
 
         const updatedMessages = [...messages, { role: 'user' as const, content: message }];
-        setMessagesForBranch(branchId, updatedMessages);
+        await setMessagesForBranch(branchId, updatedMessages);
+        setMessages(updatedMessages);
         setMessage("");
 
-        // Delay the AI call to let the user message render first
         setTimeout(async () => {
             const completion = await getCompletion({
-                messages: [...parentMessages, ...updatedMessages]  // Include parent messages for context
+                messages: [...parentMessages, ...updatedMessages]
             });
             const aiMessage = completion.choices[0].message.content ?? "No response";
-            setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
+            const finalMessages = [...updatedMessages, { role: 'assistant' as const, content: aiMessage }];
+            await setMessagesForBranch(branchId, finalMessages);
+            setMessages(finalMessages);
         }, 0);
     }
 
-    function handleBranchOut() {
+    async function handleBranchOut() {
         const newBranchId = uuidv4();
-        setMessagesForBranch(branchId, messages);
-        setBranchParent(newBranchId, branchId);  // interchange those params positions;
+        await setMessagesForBranch(branchId, messages);
+        await setBranchParent(newBranchId, branchId);
         router.push(`/branch/${newBranchId}`);
     }
 
@@ -68,8 +82,8 @@ export default function Home() {
                                     ${msg.role === 'user' ? 'items-end' : 'items-start'}
                                 `}
                             >
-                            <div
-                                className={`
+                                <div
+                                    className={`
                                         relative px-5 py-3 rounded-md
                                         ${msg.role === 'user'
                                             ? 'bg-zinc-900 text-zinc-50'
@@ -84,12 +98,7 @@ export default function Home() {
                                     <div className="whitespace-pre-wrap">
                                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                                     </div>
-                            </div>
-
-                                {/* Timestamp */}
-                                {/* <span className="text-xs text-zinc-400 mt-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span> */}
+                                </div>
                             </div>
 
                             {msg.role === 'user' && (
