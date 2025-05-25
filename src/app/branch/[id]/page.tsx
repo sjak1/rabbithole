@@ -22,11 +22,12 @@ export default function Home() {
             const fetchedMessages = await getMessagesForBranch(branchId);
             setMessages(fetchedMessages);
 
-            const parentId = await getBranchParent(branchId);
-            if (parentId) {
-                const fetchedParentMessages = await getMessagesForBranch(parentId);
-                setParentMessages(fetchedParentMessages);
+            const parent = await getBranchParent(branchId);
+            if (parent?.id) {
+               const fetchedParentMessages = await getMessagesForBranch(parent.id);
+            setParentMessages(fetchedParentMessages);
             }
+
         };
         loadMessages();
     }, [branchId, getMessagesForBranch, getBranchParent]);

@@ -10,45 +10,52 @@ import { Message } from "@/api";
 
 export default function Home() {
 
-  const { getMessagesForBranch, setMessagesForBranch, setBranchParent, deleteBranch } = useStore();
+  const { getMessagesForBranch, setMessagesForBranch, setBranchParent, deleteBranch,createBranch } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [branchId] = useState(uuidv4());
 
   const router = useRouter();
-
   useEffect(() => {
-    const loadMessages = async () => {
-      const fetchedMessages = await getMessagesForBranch(branchId);
-      setMessages(fetchedMessages);
-    };
-    loadMessages();
+   const setup = async () => {
+     await createBranch(branchId); // Ensure it exists in DB
+     const fetchedMessages = await getMessagesForBranch(branchId);
+     setMessages(fetchedMessages);
+   };
+   setup();
   }, [branchId]);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
+  e.preventDefault();
+  if (!message.trim()) return;
 
-    // Add the user's message and clear the input
-    const currentMessages = await getMessagesForBranch(branchId);
-    const updatedMessages = [...currentMessages, { role: 'user' as const, content: message }];
-    setMessagesForBranch(branchId, updatedMessages);
-    setMessage("");
+  const newMessage = { role: 'user' as const, content: message };
 
-    // Delay the AI call to let the user message render first
-    setTimeout(async () => {
-      const completion = await getCompletion({
-        messages: updatedMessages
-      });
-      const aiMessage = completion.choices[0].message.content ?? "No response";
-      setMessagesForBranch(branchId, [...updatedMessages, { role: 'assistant' as const, content: aiMessage }]);
+  await setMessagesForBranch(branchId, newMessage); // append user message
+  const updatedMessages = [...messages, newMessage];
+  setMessages(updatedMessages);
+  setMessage("");
 
-      // Navigate if on the main page (first message in a new branch)
-      if (window.location.pathname === '/') {
-        router.push(`/branch/${branchId}`);
-      }
-    }, 0);
+  setTimeout(async () => {
+    const completion = await getCompletion({
+      messages: updatedMessages, // ✅ full context
+    });
+
+    const aiMessage = {
+      role: 'assistant' as const,
+      content: completion.choices[0].message.content ?? "No response",
+    };
+
+    await setMessagesForBranch(branchId, aiMessage); // append assistant message
+    setMessages((prev) => [...prev, aiMessage]);
+
+    if (window.location.pathname === '/') {
+      router.push(`/branch/${branchId}`);
+    }
+  }, 0);  
   };
+
 
   async function handleBranchOut() {
     const newBranchId = uuidv4();
