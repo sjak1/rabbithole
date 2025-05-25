@@ -4,24 +4,50 @@ import { Request, Response } from "express";
 const prisma = new PrismaClient();
 
 export const getMessagesForBranch = async (req: Request, res: Response) => {
-    const branchId = req.params.branchId;
-    const messages = await prisma.message.findMany({
-        where: {
-            branchId: branchId
-        }
-    })
-    res.json(messages);
-}
+  const branchId = req.params.branchId;
 
-export const setMessagesForBranch = async (req: Request, res: Response) => {
+  try {
+    const branch = await prisma.branch.findUnique({
+      where: { id: branchId },
+      select: { messages: true }
+    });
+
+    if (!branch) {
+      return res.status(404).json({ error: "Branch not found" });
+    }
+
+    res.json(branch.messages ?? []);
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+};
+
+export const appendMessageToBranch = async (req: Request, res: Response) => {
     const branchId = req.params.branchId;
-    const messages = req.body.messages;
-    const updatedMessages = await prisma.message.updateMany({
-        where: { branchId: branchId },
-        data: { content: messages }
-    })
-    res.json(updatedMessages);
-}
+    const newMessage = req.body.message; // should be { role: 'user' | 'assistant' | 'system', content: '...' }
+
+    try {
+        const branch = await prisma.branch.findUnique({
+            where: { id: branchId },
+            select: { messages: true }
+        });
+
+        const currentMessages = Array.isArray(branch?.messages) ? branch.messages : [];
+
+        const updatedMessages = [...currentMessages, newMessage];
+
+        const updatedBranch = await prisma.branch.update({
+            where: { id: branchId },
+            data: { messages: updatedMessages }
+        });
+
+        res.json(updatedBranch.messages);
+    } catch (err) {
+        console.error('Failed to append message:', err);
+        res.status(500).json({ error: 'Failed to append message' });
+    }
+};
 
 export const setBranchParent = async (req: Request, res: Response) => {
     const { childId, parentId } = req.body;
@@ -63,5 +89,24 @@ export const setBranchTitle = async (req: Request, res: Response) => {
     } catch (err) {
         console.error('Error setting branch title:', err);
         res.status(500).json({ error: 'Failed to set branch title' });
+    }
+};
+
+export const createBranch = async (req: Request, res: Response) => {
+    try {
+        const { branchId, name = "New Branch" } = req.body;
+        const branch = await prisma.branch.create({
+            data: {
+                id: branchId,
+                name,
+                user: {
+                    connect: { id: "default-user" } 
+                }
+            }
+        });
+        res.json(branch);
+    } catch (err) {
+        console.error('Error creating branch:', err);
+        res.status(500).json({ error: 'Failed to create branch' });
     }
 }; 

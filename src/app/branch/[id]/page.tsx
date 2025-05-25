@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown";
 import { Message } from "@/api";
 
 export default function Home() {
-    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent, deleteBranch } = useStore();
+    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent, deleteBranch, createBranch } = useStore();
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [parentMessages, setParentMessages] = useState<Message[]>([]);
@@ -53,6 +53,7 @@ export default function Home() {
 
     async function handleBranchOut() {
         const newBranchId = uuidv4();
+        await createBranch(newBranchId);
         await setMessagesForBranch(branchId, messages);
         await setBranchParent(newBranchId, branchId);
         router.push(`/branch/${newBranchId}`);

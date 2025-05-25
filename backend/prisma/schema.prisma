@@ -18,22 +18,9 @@ model User {
   id        String    @id @default(uuid())
   email     String    @unique
   name      String?
-  messages  Message[]
   branches  Branch[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-}
-
-model Message {
-  id        String   @id @default(uuid())
-  content   String
-  role      String
-  branchId  String
-  branch    Branch   @relation(fields: [branchId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Branch {
@@ -41,7 +28,7 @@ model Branch {
   name      String
   userId    String
   user      User      @relation(fields: [userId], references: [id])
-  messages  Message[]
+  messages  Json      @default("[]")
   parentId  String?
   parent    Branch?   @relation("BranchChildren", fields: [parentId], references: [id], onDelete: Cascade)
   children  Branch[]  @relation("BranchChildren")

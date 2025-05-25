@@ -22,16 +22,16 @@ export const getMessages = async (branchId: string): Promise<Message[]> => {
     }
 };
 
-export const setMessages = async (branchId: string, messages: Message[]): Promise<void> => {
+export const setMessages = async (branchId: string, message: Message): Promise<void> => {
     try {
         const response = await fetch(`${API_URL}/messages/${branchId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages })
+            body: JSON.stringify({ message }) // 👈 not an array anymore
         });
-        if (!response.ok) throw new Error('Failed to set messages');
+        if (!response.ok) throw new Error('Failed to append message');
     } catch (error) {
-        console.error('Error setting messages:', error);
+        console.error('Error appending message:', error);
         throw error;
     }
 };
@@ -83,6 +83,20 @@ export const setBranchTitle = async (branchId: string, title: string): Promise<v
         if (!response.ok) throw new Error('Failed to set branch title');
     } catch (error) {
         console.error('Error setting branch title:', error);
+        throw error;
+    }
+};
+
+export const createBranch = async (branchId: string, name: string = "New Branch"): Promise<void> => {
+    try {
+        const response = await fetch(`${API_URL}/branch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ branchId, name })
+        });
+        if (!response.ok) throw new Error('Failed to create branch');
+    } catch (error) {
+        console.error('Error creating branch:', error);
         throw error;
     }
 };

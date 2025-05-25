@@ -25,9 +25,11 @@ export default async function getCompletion({ messages }: { messages: Message[] 
 
 export const getBranchTitle = async (messages: Message[]) => {
   try {
+    console.log('Starting title generation for messages:', messages.slice(0, 2));
     // Only use the first message and response
     const relevantMessages = messages.slice(0, 2);
 
+    console.log('Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
@@ -39,9 +41,15 @@ export const getBranchTitle = async (messages: Message[]) => {
       ],
     });
 
-    return completion.choices[0].message.content?.toLowerCase().trim() || "untitled-branch";
+    const title = completion.choices[0].message.content?.toLowerCase().trim() || "untitled-branch";
+    console.log('Successfully generated title:', title);
+    return title;
   } catch (error) {
-    console.error('Error generating branch title:', error);
+    console.error('Detailed error in OpenAI title generation:', {
+      error: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+      messages: messages.slice(0, 2)
+    });
     return "untitled-branch";
   }
 }

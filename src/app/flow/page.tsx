@@ -39,10 +39,19 @@ export default function FlowPage() {
 
                 if (messages.length >= 2) {
                     try {
+                        console.log(`Attempting to generate title for branch ${branchId}`);
                         const title = await getBranchTitle(messages);
+                        console.log(`Generated title "${title}" for branch ${branchId}, now setting it...`);
                         await setBranchTitle(branchId, title);
+                        console.log(`Successfully set title "${title}" for branch ${branchId}`);
                     } catch (error) {
-                        console.error(`Error loading title for branch ${branchId}:`, error);
+                        console.error(`Detailed error in branch ${branchId} title process:`, {
+                            error: error instanceof Error ? error.message : error,
+                            phase: 'title-setting',
+                            branchId,
+                            messageCount: messages.length
+                        });
+                        console.log(`Falling back to default title for branch ${branchId}`);
                         await setBranchTitle(branchId, `Branch ${branchId.slice(0, 4)}...`);
                     }
                 } else {

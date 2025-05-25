@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle } from '../api';
+import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle, createBranch } from '../api';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -18,6 +18,7 @@ interface Store {
     setBranchTitle: (branchId: string, title: string) => Promise<void>;
     getBranchTitle: (branchId: string) => string | null;
     deleteBranch: (branchId: string) => Promise<void>;
+    createBranch: (branchId: string, name?: string) => Promise<void>;
 }
 
 export const useStore = create<Store>()(
@@ -88,6 +89,9 @@ export const useStore = create<Store>()(
                         branchTitles: restTitles
                     }
                 });
+            },
+            createBranch: async (branchId, name) => {
+                await createBranch(branchId, name);
             }
         }),
         {
