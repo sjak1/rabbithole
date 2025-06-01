@@ -22,16 +22,17 @@ export const getMessages = async (branchId: string): Promise<Message[]> => {
     }
 };
 
-export const setMessages = async (branchId: string, message: Message): Promise<void> => {
+export const setMessages = async (branchId: string, message: Message): Promise<Message[]> => {
     try {
         const response = await fetch(`${API_URL}/messages/${branchId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message }) // 👈 not an array anymore
+            body: JSON.stringify({ message }) // Send single message to match backend
         });
-        if (!response.ok) throw new Error('Failed to append message');
+        if (!response.ok) throw new Error('Failed to set messages');
+        return response.json(); // Returns updated messages array
     } catch (error) {
-        console.error('Error appending message:', error);
+        console.error('Error setting messages:', error);
         throw error;
     }
 };

@@ -4,7 +4,6 @@ import "./globals.css";
 import TopNav from "../components/topnav";
 import '@xyflow/react/dist/style.css';
 import { StoreInitializer } from "@/components/StoreInitializer";
-import SideNav from "@/components/SideNav";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import getCompletion from "./openai";
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
@@ -10,57 +10,68 @@ import { Message } from "@/api";
 
 export default function Home() {
 
-  const { getMessagesForBranch, setMessagesForBranch, setBranchParent, deleteBranch,createBranch } = useStore();
+  const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch,createBranch } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [parentMessages, setParentMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [branchId] = useState(uuidv4());
+  const branchCreatedRef = useRef(false);
 
   const router = useRouter();
   useEffect(() => {
-   const setup = async () => {
-     await createBranch(branchId); // Ensure it exists in DB
-     const fetchedMessages = await getMessagesForBranch(branchId);
-     setMessages(fetchedMessages);
+   const loadParents = async () => {
+     // Load parent messages (root page has no parent, so this is mostly for consistency)
+     const parentId = await getBranchParent(branchId);
+     if (parentId) {
+       const fetchedParentMessages = await getMessagesForBranch(parentId);
+       setParentMessages(fetchedParentMessages);
+     }
    };
-   setup();
-  }, [branchId]);
+   loadParents();
+  }, [branchId, getMessagesForBranch, getBranchParent]);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!message.trim()) return;
+    e.preventDefault();
+    if (!message.trim()) return;
 
-  const newMessage = { role: 'user' as const, content: message };
-
-  await setMessagesForBranch(branchId, newMessage); // append user message
-  const updatedMessages = [...messages, newMessage];
-  setMessages(updatedMessages);
-  setMessage("");
-
-  setTimeout(async () => {
-    const completion = await getCompletion({
-      messages: updatedMessages, // ✅ full context
-    });
-
-    const aiMessage = {
-      role: 'assistant' as const,
-      content: completion.choices[0].message.content ?? "No response",
-    };
-
-    await setMessagesForBranch(branchId, aiMessage); // append assistant message
-    setMessages((prev) => [...prev, aiMessage]);
-
-    if (window.location.pathname === '/') {
-      router.push(`/branch/${branchId}`);
+    // Lazily create the branch on first user message to avoid empty branches in DB
+    if (!branchCreatedRef.current) {
+      await createBranch(branchId);
+      branchCreatedRef.current = true;
     }
-  }, 0);  
+
+    const newMessage = { role: 'user' as const, content: message };
+    
+    // Let backend handle adding to array, get updated messages back
+    const updatedMessages = await addMessageToBranch(branchId, newMessage);
+    setMessages(updatedMessages);
+    setMessage("");
+
+    setTimeout(async () => {
+      const completion = await getCompletion({
+        messages: [...parentMessages, ...updatedMessages], // ✅ Full context including parent
+      });
+
+      const aiMessage = {
+        role: 'assistant' as const,
+        content: completion.choices[0].message.content ?? "No response",
+      };
+
+      // Add AI response the same way
+      const finalMessages = await addMessageToBranch(branchId, aiMessage);
+      setMessages(finalMessages);
+
+      if (window.location.pathname === '/') {
+        router.push(`/branch/${branchId}`);
+      }
+    }, 0);  
   };
 
 
   async function handleBranchOut() {
     const newBranchId = uuidv4();
-    const currentMessages = await getMessagesForBranch(branchId);
-    setMessagesForBranch(branchId, currentMessages);
+    await createBranch(newBranchId);
     setBranchParent(newBranchId, branchId);
     router.push(`/branch/${newBranchId}`);
   }

@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown";
 import { Message } from "@/api";
 
 export default function Home() {
-    const { getMessagesForBranch, setMessagesForBranch, setBranchParent, getBranchParent, deleteBranch, createBranch } = useStore();
+    const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch, createBranch } = useStore();
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [parentMessages, setParentMessages] = useState<Message[]>([]);
@@ -22,9 +22,9 @@ export default function Home() {
             const fetchedMessages = await getMessagesForBranch(branchId);
             setMessages(fetchedMessages);
 
-            const parent = await getBranchParent(branchId);
-            if (parent?.id) {
-               const fetchedParentMessages = await getMessagesForBranch(parent.id);
+            const parentId = await getBranchParent(branchId);
+            if (parentId) {
+               const fetchedParentMessages = await getMessagesForBranch(parentId);
             setParentMessages(fetchedParentMessages);
             }
 
@@ -36,8 +36,8 @@ export default function Home() {
         e.preventDefault();
         if (!message.trim()) return;
 
-        const updatedMessages = [...messages, { role: 'user' as const, content: message }];
-        await setMessagesForBranch(branchId, updatedMessages);
+        const newMessage = { role: 'user' as const, content: message };
+        const updatedMessages = await addMessageToBranch(branchId, newMessage);
         setMessages(updatedMessages);
         setMessage("");
 
@@ -45,9 +45,8 @@ export default function Home() {
             const completion = await getCompletion({
                 messages: [...parentMessages, ...updatedMessages]
             });
-            const aiMessage = completion.choices[0].message.content ?? "No response";
-            const finalMessages = [...updatedMessages, { role: 'assistant' as const, content: aiMessage }];
-            await setMessagesForBranch(branchId, finalMessages);
+            const aiMessage = { role: 'assistant' as const, content: completion.choices[0].message.content ?? "No response" };
+            const finalMessages = await addMessageToBranch(branchId, aiMessage);
             setMessages(finalMessages);
         }, 0);
     }
@@ -55,7 +54,6 @@ export default function Home() {
     async function handleBranchOut() {
         const newBranchId = uuidv4();
         await createBranch(newBranchId);
-        await setMessagesForBranch(branchId, messages);
         await setBranchParent(newBranchId, branchId);
         router.push(`/branch/${newBranchId}`);
     }
