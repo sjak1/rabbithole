@@ -20,11 +20,13 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
    const loadParents = async () => {
-     // Load parent messages (root page has no parent, so this is mostly for consistency)
-     const parentId = await getBranchParent(branchId);
-     if (parentId) {
-       const fetchedParentMessages = await getMessagesForBranch(parentId);
-       setParentMessages(fetchedParentMessages);
+     // Only try to get parent if branch exists (after first message)
+     if (branchCreatedRef.current) {
+       const parentId = await getBranchParent(branchId);
+       if (parentId) {
+         const fetchedParentMessages = await getMessagesForBranch(parentId);
+         setParentMessages(fetchedParentMessages);
+       }
      }
    };
    loadParents();

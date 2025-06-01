@@ -82,16 +82,16 @@ export const useStore = create<Store>()(
                 await deleteBranch(branchId);
                 set(state => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { [branchId]: _messages, ...restMessages } = state.messagesByBranch;
+                    const { [branchId]: _msg, ...restMessages } = state.messagesByBranch;
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { [branchId]: _parent, ...restParents } = state.branchParents;
+                    const { [branchId]: _par, ...restParents } = state.branchParents;
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [branchId]: _title, ...restTitles } = state.branchTitles;
                     return {
                         messagesByBranch: restMessages,
                         branchParents: restParents,
-                        branchTitles: restTitles
-                    }
+                        branchTitles: restTitles,
+                    };
                 });
             },
             createBranch: async (branchId, name) => {

@@ -8,10 +8,10 @@ import {
     useEdgesState,
     BackgroundVariant
 } from '@xyflow/react';
-import { useStore } from "@/store/store";
 import '@xyflow/react/dist/style.css';
-import { useEffect } from 'react';
+import { useStore } from "@/store/store";
 import { getBranchTitle } from "@/app/openai";
+import { useEffect, useMemo } from "react";
 
 export default function FlowPage() {
     const {
@@ -21,59 +21,82 @@ export default function FlowPage() {
         setBranchTitle
     } = useStore();
 
-    // Simplified title generation
+    /* ------------------------------------------------------------------ */
+    /* 🏷️  Auto-generate missing titles ---------------------------------- */
+    /* ------------------------------------------------------------------ */
     useEffect(() => {
-        Object.entries(messagesByBranch).forEach(async ([branchId, messages]) => {
-            if (!branchTitles[branchId] && messages.length >= 2) {
-                try {
-                    const title = await getBranchTitle(messages);
-                    await setBranchTitle(branchId, title);
-                } catch (error) {
-                    console.error(`Error generating title for branch ${branchId}:`, error);
-                    await setBranchTitle(branchId, `Branch ${branchId.slice(0, 4)}...`);
+        const generateTitles = async () => {
+            const work: Promise<void>[] = [];
+
+            Object.entries(messagesByBranch).forEach(([branchId, msgs]) => {
+                if (!branchTitles[branchId] && msgs.length >= 2) {
+                    work.push(
+                        getBranchTitle(msgs)
+                            .then((title) => setBranchTitle(branchId, title))
+                            .catch((err) => {
+                                console.error(`Title generation failed for ${branchId}:`, err);
+                                return setBranchTitle(branchId, `branch-${branchId.slice(0, 4)}`);
+                            })
+                    );
                 }
-            }
-        });
-    }, [messagesByBranch, branchTitles, setBranchTitle]);
+            });
 
-    // Create nodes and edges directly from data
-    const nodes = Object.keys(messagesByBranch).map((branchId, index) => ({
-        id: branchId,
-        position: { x: index * 250, y: 0 }, // Simple horizontal layout
-        data: {
-            label: branchTitles[branchId] || 'New Branch',
-            url: `/branch/${branchId}`
-        },
-        style: {
-            background: '#f0f9ff',
-            border: '2px solid #3b82f6',
-            padding: '8px',
-            borderRadius: '8px',
-            width: 180,
-        },
-    }));
+            if (work.length) await Promise.all(work);
+        };
 
-    const edges = Object.entries(branchParents).map(([branchId, parentId]) => ({
-        id: `${parentId}-${branchId}`,
-        source: parentId,
-        target: branchId,
-    }));
+        generateTitles();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [messagesByBranch, branchTitles]);
 
-    const [layoutedNodes, _, onNodesChange] = useNodesState(nodes);
-    const [layoutedEdges, __, onEdgesChange] = useEdgesState(edges);
+    /* ------------------------------------------------------------------ */
+    /* 🖼️  Build nodes / edges ------------------------------------------- */
+    /* ------------------------------------------------------------------ */
+    const nodesData = useMemo(() => {
+        return Object.keys(messagesByBranch).map((branchId, idx) => ({
+            id: branchId,
+            position: { x: idx * 250, y: 0 },
+            data: { label: branchTitles[branchId] || "new-branch", url: `/branch/${branchId}` },
+            style: {
+                background: '#f0f9ff',
+                border: '2px solid #3b82f6',
+                padding: '8px',
+                borderRadius: '8px',
+                width: 180,
+            },
+        }));
+    }, [messagesByBranch, branchTitles]);
 
+    const edgesData = useMemo(() => {
+        return Object.entries(branchParents).map(([childId, parentId]) => ({
+            id: `${parentId}-${childId}`,
+            source: parentId,
+            target: childId,
+        }));
+    }, [branchParents]);
+
+    /* ------------------------------------------------------------------ */
+    /* 🔄  Keep ReactFlow state in sync ---------------------------------- */
+    /* ------------------------------------------------------------------ */
+    const [nodes, setNodes, onNodesChange] = useNodesState(nodesData);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(edgesData);
+
+    // Whenever the underlying data changes, update ReactFlow state.
+    useEffect(() => setNodes(nodesData), [nodesData, setNodes]);
+    useEffect(() => setEdges(edgesData), [edgesData, setEdges]);
+
+    /* ------------------------------------------------------------------ */
+    /* 🎨  Render --------------------------------------------------------- */
+    /* ------------------------------------------------------------------ */
     return (
         <div className="h-screen w-full">
             <ReactFlow
-                nodes={layoutedNodes}
-                edges={layoutedEdges}
+                nodes={nodes}
+                edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
-                nodesDraggable={true}
+                nodesDraggable
                 fitView
-                onNodeClick={(_, node) => {
-                    window.location.href = `/branch/${node.id}`;
-                }}
+                onNodeClick={(_, n) => (window.location.href = `/branch/${n.id}`)}
                 maxZoom={2}
                 minZoom={0.1}
             >
