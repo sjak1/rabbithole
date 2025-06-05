@@ -38,8 +38,8 @@ export default function FlowPage() {
                                 return setBranchTitle(branchId, `branch-${branchId.slice(0, 4)}`);
                             })
                     );
-                }
-            });
+            }
+        });
 
             if (work.length) await Promise.all(work);
         };
@@ -53,25 +53,25 @@ export default function FlowPage() {
     /* ------------------------------------------------------------------ */
     const nodesData = useMemo(() => {
         return Object.keys(messagesByBranch).map((branchId, idx) => ({
-            id: branchId,
+        id: branchId,
             position: { x: idx * 250, y: 0 },
             data: { label: branchTitles[branchId] || "new-branch", url: `/branch/${branchId}` },
-            style: {
-                background: '#f0f9ff',
-                border: '2px solid #3b82f6',
-                padding: '8px',
-                borderRadius: '8px',
-                width: 180,
-            },
-        }));
+        style: {
+            background: '#f0f9ff',
+            border: '2px solid #3b82f6',
+            padding: '8px',
+            borderRadius: '8px',
+            width: 180,
+        },
+    }));
     }, [messagesByBranch, branchTitles]);
 
     const edgesData = useMemo(() => {
         return Object.entries(branchParents).map(([childId, parentId]) => ({
             id: `${parentId}-${childId}`,
-            source: parentId,
+        source: parentId,
             target: childId,
-        }));
+    }));
     }, [branchParents]);
 
     /* ------------------------------------------------------------------ */

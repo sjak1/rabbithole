@@ -44,7 +44,7 @@ export default function Home() {
     }
 
     const newMessage = { role: 'user' as const, content: message };
-    
+
     // Let backend handle adding to array, get updated messages back
     const updatedMessages = await addMessageToBranch(branchId, newMessage);
     setMessages(updatedMessages);
