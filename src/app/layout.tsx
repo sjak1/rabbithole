@@ -4,6 +4,7 @@ import "./globals.css";
 import TopNav from "../components/topnav";
 import '@xyflow/react/dist/style.css';
 import { StoreInitializer } from "@/components/StoreInitializer";
+import Provider from "./provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,6 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Provider>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -42,6 +44,7 @@ export default function RootLayout({
           </div>
         </div>
       </body>
+      </Provider>
     </html>
   );
 }
