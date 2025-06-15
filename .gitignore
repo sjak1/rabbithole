@@ -44,3 +44,5 @@ next-env.d.ts
 src/fun.js
 src/app/test/page.tsx
 deepseek-api.mjs
+# clerk configuration (can include secrets)
+/.clerk/

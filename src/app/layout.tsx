@@ -4,7 +4,9 @@ import "./globals.css";
 import TopNav from "../components/topnav";
 import '@xyflow/react/dist/style.css';
 import { StoreInitializer } from "@/components/StoreInitializer";
-import Provider from "./provider";
+import {
+  ClerkProvider,
+} from '@clerk/nextjs'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Provider>
+      <ClerkProvider>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -44,7 +46,7 @@ export default function RootLayout({
           </div>
         </div>
       </body>
-      </Provider>
+      </ClerkProvider>
     </html>
   );
 }

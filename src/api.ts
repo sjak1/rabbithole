@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:4000';
 
 export interface Message {
     role: 'user' | 'assistant';
@@ -13,7 +13,9 @@ export type Branch = {
 
 export const getMessages = async (branchId: string): Promise<Message[]> => {
     try {
-        const response = await fetch(`${API_URL}/messages/${branchId}`);
+        const response = await fetch(`${API_URL}/messages/${branchId}`, {
+            credentials: 'include'
+        });
         if (!response.ok) throw new Error('Failed to fetch messages');
         return response.json();
     } catch (error) {
@@ -27,7 +29,8 @@ export const setMessages = async (branchId: string, message: Message): Promise<M
         const response = await fetch(`${API_URL}/messages/${branchId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message }) // Send single message to match backend
+            body: JSON.stringify({ message }), // Send single message to match backend
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to set messages');
         return response.json(); // Returns updated messages array
@@ -42,7 +45,8 @@ export const setBranchParent = async (childId: string, parentId: string): Promis
         const response = await fetch(`${API_URL}/parent/${childId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ childId, parentId })
+            body: JSON.stringify({ childId, parentId }),
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to set branch parent');
     } catch (error) {
@@ -53,7 +57,7 @@ export const setBranchParent = async (childId: string, parentId: string): Promis
 
 export const getBranchParent = async (branchId: string): Promise<Branch | null> => {
     try {
-        const response = await fetch(`${API_URL}/parent/${branchId}`);
+        const response = await fetch(`${API_URL}/parent/${branchId}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch branch parent');
         return response.json();
     } catch (error) {
@@ -65,7 +69,8 @@ export const getBranchParent = async (branchId: string): Promise<Branch | null> 
 export const deleteBranch = async (branchId: string): Promise<void> => {
     try {
         const response = await fetch(`${API_URL}/branch/${branchId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to delete branch');
     } catch (error) {
@@ -79,7 +84,8 @@ export const setBranchTitle = async (branchId: string, title: string): Promise<v
         const response = await fetch(`${API_URL}/title/${branchId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title })
+            body: JSON.stringify({ title }),
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to set branch title');
     } catch (error) {
@@ -93,7 +99,8 @@ export const createBranch = async (branchId: string, name: string = "New Branch"
         const response = await fetch(`${API_URL}/branch`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ branchId, name })
+            body: JSON.stringify({ branchId, name }),
+            credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to create branch');
     } catch (error) {
