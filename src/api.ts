@@ -109,3 +109,15 @@ export const createBranch = async (branchId: string, name: string = "New Branch"
     }
 };
 
+// Fetch all branches for the signed-in user
+export const getBranches = async (): Promise<Branch[]> => {
+    try {
+        const response = await fetch(`${API_URL}/branches`, { credentials: 'include' });
+        if (!response.ok) throw new Error('Failed to fetch branches');
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching branches:', error);
+        return [];
+    }
+};
+

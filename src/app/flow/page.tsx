@@ -18,7 +18,8 @@ export default function FlowPage() {
         messagesByBranch,
         branchParents,
         branchTitles,
-        setBranchTitle
+        setBranchTitle,
+        loadBranches
     } = useStore();
 
     /* ------------------------------------------------------------------ */
@@ -38,8 +39,8 @@ export default function FlowPage() {
                                 return setBranchTitle(branchId, `branch-${branchId.slice(0, 4)}`);
                             })
                     );
-            }
-        });
+                }
+            });
 
             if (work.length) await Promise.all(work);
         };
@@ -47,6 +48,11 @@ export default function FlowPage() {
         generateTitles();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [messagesByBranch, branchTitles]);
+
+    // On mount load branches from backend
+    useEffect(() => {
+        loadBranches().catch(console.error);
+    }, [loadBranches]);
 
     /* ------------------------------------------------------------------ */
     /* 🖼️  Build nodes / edges ------------------------------------------- */

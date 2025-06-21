@@ -143,3 +143,29 @@ export const createBranch = async (req: Request, res: Response): Promise<void> =
     return;
   }
 };
+
+export const getBranchesForUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    res.status(401).json({ error: 'Not signed in' });
+    return;
+  }
+
+  try {
+    const branches = await prisma.branch.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        parentId: true,
+        messages: true
+      }
+    });
+
+    res.json(branches);
+  } catch (err) {
+    console.error('Error fetching branches:', err);
+    res.status(500).json({ error: 'Failed to fetch branches' });
+  }
+};

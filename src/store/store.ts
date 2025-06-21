@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle, createBranch } from '../api';
+import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle, createBranch, getBranches } from '../api';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -19,6 +19,7 @@ interface Store {
     getBranchTitle: (branchId: string) => string | null;
     deleteBranch: (branchId: string) => Promise<void>;
     createBranch: (branchId: string, name?: string) => Promise<void>;
+    loadBranches: () => Promise<void>;
 }
 
 export const useStore = create<Store>()(
@@ -96,6 +97,22 @@ export const useStore = create<Store>()(
             },
             createBranch: async (branchId, name) => {
                 await createBranch(branchId, name);
+            },
+            loadBranches: async () => {
+                const branches = await getBranches();
+                set(() => {
+                    const messagesByBranch: Record<string, Message[]> = {};
+                    const branchParents: Record<string, string> = {};
+                    const branchTitles: Record<string, string> = {};
+
+                    branches.forEach(br => {
+                        messagesByBranch[br.id] = (br as unknown as { messages?: Message[] }).messages ?? [];
+                        if (br.parentId) branchParents[br.id] = br.parentId;
+                        branchTitles[br.id] = br.name;
+                    });
+
+                    return { messagesByBranch, branchParents, branchTitles };
+                });
             }
         }),
         {
