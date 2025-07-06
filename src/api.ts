@@ -141,26 +141,72 @@ export const getBranches = async (): Promise<Branch[]> => {
     }
 };
 
-export const getLLMResponse = async (messages: Message[]): Promise<{ content:string; credits:number }> => {
-  try {
-    const response = await fetch(`${API_URL}/api/llm`, {
+export const getLLMResponse = async (
+  messages: Message[], 
+  onContent: (content: string) => void
+): Promise<{ content: string; credits: number }> => {
+  return new Promise((resolve, reject) => {
+    // Since EventSource doesn't support POST, we'll use fetch with streaming
+    fetch(`${API_URL}/api/llm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages }),
       credentials: 'include',
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch LLM response');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      const readStream = async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  
+                  if (data.type === 'content') {
+                    fullContent += data.content;
+                    onContent(fullContent);
+                  } else if (data.type === 'complete') {
+                    resolve({ content: fullContent, credits: data.credits });
+                    return;
+                  } else if (data.type === 'error') {
+                    reject(new Error(data.error));
+                    return;
+                  }
+                } catch {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      readStream();
+    })
+    .catch(error => {
+      console.error('Error fetching LLM response:', error);
+      reject(error);
     });
-
-    if (!response.ok) throw new Error('Failed to fetch LLM response');
-
-    const data = await response.json();
-
-    return {
-      content: data.llmResponse.choices?.[0]?.message?.content ?? "No response",
-      credits: data.remainingCredits
-    };
-  } catch (error) {
-    console.error('Error fetching LLM response:', error);
-    return { content: "Error: Could not get a response.", credits: 0 };
-  }
+  });
 };
 

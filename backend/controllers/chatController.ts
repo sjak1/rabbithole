@@ -280,20 +280,48 @@ export const getLLMResponse = async (req: Request, res: Response): Promise<void>
   }
 
   try {
-    const response = await getCompletion({ messages });
+    // Set up Server-Sent Events
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+      'Access-Control-Allow-Credentials': 'true',
+    });
 
-    // Pricing for gpt-4o-mini
+    const stream = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        ...messages,
+      ],
+      stream: true,
+    });
+
+    let fullContent = '';
+    let promptTokens = 0;
+    let completionTokens = 0;
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (content) {
+        fullContent += content;
+        res.write(`data: ${JSON.stringify({ content, type: 'content' })}\n\n`);
+      }
+
+      // Track usage if available
+      if (chunk.usage) {
+        promptTokens = chunk.usage.prompt_tokens || 0;
+        completionTokens = chunk.usage.completion_tokens || 0;
+      }
+    }
+
+    // Calculate cost and deduct credits
     const costPerMillionInputTokens = 0.15;
     const costPerMillionOutputTokens = 0.60;
-
-    const promptTokens = response.usage?.prompt_tokens ?? 0;
-    const completionTokens = response.usage?.completion_tokens ?? 0;
-
     const cost = (promptTokens / 1_000_000) * costPerMillionInputTokens + 
                  (completionTokens / 1_000_000) * costPerMillionOutputTokens;
 
-
-    // Deduct credits
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -306,13 +334,18 @@ export const getLLMResponse = async (req: Request, res: Response): Promise<void>
       select: { credits: true }
     });
 
-    res.json({
-      llmResponse: response,
-      remainingCredits: updatedUser?.credits ?? 0
-    });
+    // Send final message with credits
+    res.write(`data: ${JSON.stringify({ 
+      type: 'complete', 
+      credits: updatedUser?.credits ?? 0,
+      fullContent 
+    })}\n\n`);
+    
+    res.end();
 
   } catch (err) {
     console.error("Error in getLLMResponse:", err);
-    res.status(500).json({ error: "LLM failed" });
+    res.write(`data: ${JSON.stringify({ type: 'error', error: 'LLM failed' })}\n\n`);
+    res.end();
   }
-}
+};

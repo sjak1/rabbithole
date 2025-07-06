@@ -21,6 +21,7 @@ export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [parentMessages, setParentMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [streamingMessage, setStreamingMessage] = useState("");
     const params = useParams();
     const branchId = params?.id as string;
     const router = useRouter();
@@ -49,25 +50,39 @@ export default function Home() {
         setMessages(updatedMessages);
         setMessage("");
         setIsLoading(true);
+        setStreamingMessage("");
 
         setTimeout(async () => {
-            const { content, credits}= await getLLMResponse([...parentMessages, ...updatedMessages]);
-            setCredits(credits); 
+            try {
+                const { content, credits } = await getLLMResponse(
+                    [...parentMessages, ...updatedMessages],
+                    (streamContent) => {
+                        setStreamingMessage(streamContent);
+                    }
+                );
+                
+                setCredits(credits);
+                setStreamingMessage("");
 
-            const aiMessage = {
-              role: 'assistant' as const,
-              content
-            };
+                const aiMessage = {
+                    role: 'assistant' as const,
+                    content
+                };
 
-            const finalMessages = await addMessageToBranch(branchId, aiMessage);
-            setMessages(finalMessages);
-            setIsLoading(false);
+                const finalMessages = await addMessageToBranch(branchId, aiMessage);
+                setMessages(finalMessages);
+                setIsLoading(false);
 
-            // Generate title after the first exchange
-            if (finalMessages.length === 2) {
-                const { title, credits: remainingCredits } = await generateTitle(branchId);
-                await setBranchTitle(branchId, title);
-                setCredits(remainingCredits);
+                // Generate title after the first exchange
+                if (finalMessages.length === 2) {
+                    const { title, credits: remainingCredits } = await generateTitle(branchId);
+                    await setBranchTitle(branchId, title);
+                    setCredits(remainingCredits);
+                }
+            } catch (error) {
+                console.error('Error getting LLM response:', error);
+                setIsLoading(false);
+                setStreamingMessage("");
             }
         }, 0);
     }
@@ -86,12 +101,17 @@ export default function Home() {
 
     return (
         <>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-[49rem] mx-auto">
                 <div className="flex-1 space-y-8 pb-36">
                     {messages.map((msg, index) => (
                         <ChatMessage key={index} message={msg} />
                     ))}
-                    {isLoading && (
+                    {streamingMessage && (
+                        <ChatMessage 
+                            message={{ role: 'assistant', content: streamingMessage }} 
+                        />
+                    )}
+                    {isLoading && !streamingMessage && (
                         <div className="flex items-end gap-3 justify-start">
                             <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
                             <div className="group flex flex-col items-start w-full">

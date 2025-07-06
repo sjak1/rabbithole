@@ -38,7 +38,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             <div className={`flex flex-col ${message.role === 'user' ? 'max-w-[60%] items-end' : 'items-start w-full'}`}>
                 <div
                     className={`
-                        relative py-3 text-base
+                        relative py-3 text-base leading-loose
                         ${message.role === 'user'
                             ? 'px-5 bg-zinc-900 text-zinc-50 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]'
                             : ''
@@ -62,14 +62,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                 const codeIndex = node?.position?.start?.offset ?? Math.random();
 
                                 return match ? (
-                                    <div className="relative my-2 bg-zinc-800 rounded-md">
-                                        <div className="flex items-center justify-between px-4 py-1 bg-zinc-700 rounded-t-md">
-                                            <span className="text-xs text-zinc-400">{match[1]}</span>
-                                            <button onClick={() => handleCopy(codeString, codeIndex)}>
+                                    <div className="relative group/code my-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+                                        <div className="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-0 group-hover/code:opacity-100 transition-opacity duration-300">
+                                            <span className="text-xs text-zinc-400 select-none">
+                                                {match[1]}
+                                            </span>
+                                            <button
+                                                onClick={() => handleCopy(codeString, codeIndex)}
+                                                className="p-1 rounded-md bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-50"
+                                            >
                                                 {codeCopied === codeIndex ? (
-                                                    <span className="text-xs flex items-center gap-1 text-green-400"><Check size={14} /> Copied!</span>
+                                                    <Check size={14} className="text-emerald-400" />
                                                 ) : (
-                                                    <span className="text-xs flex items-center gap-1 text-zinc-400 hover:text-white"><Clipboard size={14} /> Copy</span>
+                                                    <Clipboard size={14} />
                                                 )}
                                             </button>
                                         </div>
@@ -77,6 +82,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                             style={vscDarkPlus as { [key: string]: React.CSSProperties }}
                                             language={match[1]}
                                             PreTag="div"
+                                            customStyle={{
+                                                padding: '1rem',
+                                                backgroundColor: 'transparent',
+                                            }}
                                         >
                                             {codeString}
                                         </SyntaxHighlighter>
