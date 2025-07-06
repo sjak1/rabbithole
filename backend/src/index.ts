@@ -4,7 +4,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser } from '../controllers/chatController';
+import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, getLLMResponse, generateBranchTitle } from '../controllers/chatController';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 const app = express();
 
@@ -31,9 +31,13 @@ app.delete('/branch/:branchId', requireAuth(), deleteBranch);
 
 app.post('/title/:branchId', requireAuth(), setBranchTitle);
 
+app.post('/title/generate/:branchId', requireAuth(), generateBranchTitle);
+
 app.post('/branch', requireAuth(), createBranch);
 
 app.get('/branches', requireAuth(), getBranchesForUser);
+
+app.post('/api/llm', getLLMResponse);
 
 app.listen(4000, () => {
     console.log("Express server is running on port 4000");

@@ -8,12 +8,19 @@ import {
     UserButton,
   } from '@clerk/nextjs'
 
-export default function TopNav() {
+import { useStore } from "@/store/store";
+import { motion } from "motion/react"
 
+export default function TopNav() {
+    
+    const credits = useStore(state => state.credits);
 
     return (
         <nav className="sticky top-0 z-50 backdrop-blur-sm bg-white/80 border-b border-gray-200 shadow-sm">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1 }}  
+              className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <Link href="/" className="flex items-center gap-2 group">
                         <RabbitIcon className="w-6 h-6 text-gray-700 group-hover:text-gray-900 transition-colors" />
@@ -49,9 +56,12 @@ export default function TopNav() {
                         <SignedOut>
                             <SignInButton />
                         </SignedOut>
+                        <div>
+                          {credits}
+                        </div>
                      </div>
                 </div>
-            </div>
+            </motion.div>
         </nav>
     );
 }

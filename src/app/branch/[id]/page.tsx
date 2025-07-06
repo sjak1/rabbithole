@@ -1,18 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
-import getCompletion from "@/app/openai";
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
-import ReactMarkdown from "react-markdown";
-import { Message } from "@/api";
+import { Message, getLLMResponse, generateTitle } from "@/api";
+import { ChatMessage } from "@/components/ChatMessage";
 
 export default function Home() {
-    const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch, createBranch } = useStore();
+
+    const getMessagesForBranch = useStore(s => s.getMessagesForBranch);
+    const addMessageToBranch = useStore(s => s.addMessageToBranch);
+    const setBranchParent = useStore(s => s.setBranchParent);
+    const getBranchParent = useStore(s => s.getBranchParent);
+    const deleteBranch = useStore(s => s.deleteBranch);
+    const createBranch = useStore(s => s.createBranch);
+    const setCredits = useStore(s => s.setCredits);
+    const setBranchTitle = useStore(s => s.setBranchTitle);
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [parentMessages, setParentMessages] = useState<Message[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const params = useParams();
     const branchId = params?.id as string;
     const router = useRouter();
@@ -40,14 +48,27 @@ export default function Home() {
         const updatedMessages = await addMessageToBranch(branchId, newMessage);
         setMessages(updatedMessages);
         setMessage("");
+        setIsLoading(true);
 
         setTimeout(async () => {
-            const completion = await getCompletion({
-                messages: [...parentMessages, ...updatedMessages]
-            });
-            const aiMessage = { role: 'assistant' as const, content: completion.choices[0].message.content ?? "No response" };
+            const { content, credits}= await getLLMResponse([...parentMessages, ...updatedMessages]);
+            setCredits(credits); 
+
+            const aiMessage = {
+              role: 'assistant' as const,
+              content
+            };
+
             const finalMessages = await addMessageToBranch(branchId, aiMessage);
             setMessages(finalMessages);
+            setIsLoading(false);
+
+            // Generate title after the first exchange
+            if (finalMessages.length === 2) {
+                const { title, credits: remainingCredits } = await generateTitle(branchId);
+                await setBranchTitle(branchId, title);
+                setCredits(remainingCredits);
+            }
         }, 0);
     }
 
@@ -68,44 +89,22 @@ export default function Home() {
             <div className="flex-1 mb-4 pb-36">
                 <div className="space-y-8">
                     {messages.map((msg, index) => (
-                        <div
-                            key={index}
-                            className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            {msg.role === 'assistant' && (
-                                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300 transition-all duration-200 group-hover:bg-zinc-400" />
-                            )}
-
-                            <div
-                                className={`
-                                    group flex flex-col max-w-[80%] 
-                                    ${msg.role === 'user' ? 'items-end' : 'items-start'}
-                                `}
-                            >
-                                <div
-                                    className={`
-                                        relative px-5 py-3 rounded-md
-                                        ${msg.role === 'user'
-                                            ? 'bg-zinc-900 text-zinc-50'
-                                            : 'bg-zinc-50 border-l-2 border-zinc-200'
-                                        }
-                                        shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]
-                                        hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.12)]
-                                        transition-all duration-200 ease-in-out
-                                        hover:translate-x-[-1px] hover:translate-y-[-1px]
-                                    `}
-                                >
-                                    <div className="whitespace-pre-wrap">
-                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ChatMessage key={index} message={msg} />
+                    ))}
+                    {isLoading && (
+                        <div className="flex items-end gap-3 justify-start">
+                            <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
+                            <div className="group flex flex-col max-w-[80%] items-start">
+                                <div className="relative px-5 py-3 rounded-md bg-zinc-50 border-l-2 border-zinc-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
+                                    <div className="flex space-x-1">
+                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse"></div>
                                     </div>
                                 </div>
                             </div>
-
-                            {msg.role === 'user' && (
-                                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-400 transition-all duration-200 group-hover:bg-zinc-600" />
-                            )}
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
             <div className="fixed bottom-0 left-0 right-0 bg-zinc-50/90 backdrop-blur-sm border-t border-zinc-200 py-4">

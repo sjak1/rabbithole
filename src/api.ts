@@ -94,6 +94,26 @@ export const setBranchTitle = async (branchId: string, title: string): Promise<v
     }
 };
 
+export const generateTitle = async (branchId: string): Promise<{title: string, credits: number}> => {
+    try {
+        const response = await fetch(`${API_URL}/title/generate/${branchId}`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Failed to generate title');
+
+        const data = await response.json();
+        return {
+            title: data.updatedBranch.name,
+            credits: data.remainingCredits
+        };
+
+    } catch (error) {
+        console.error('Error generating title:', error);
+        throw error;
+    }
+};
+
 export const createBranch = async (branchId: string, name: string = "New Branch"): Promise<void> => {
     try {
         const response = await fetch(`${API_URL}/branch`, {
@@ -119,5 +139,28 @@ export const getBranches = async (): Promise<Branch[]> => {
         console.error('Error fetching branches:', error);
         return [];
     }
+};
+
+export const getLLMResponse = async (messages: Message[]): Promise<{ content:string; credits:number }> => {
+  try {
+    const response = await fetch(`${API_URL}/api/llm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch LLM response');
+
+    const data = await response.json();
+
+    return {
+      content: data.llmResponse.choices?.[0]?.message?.content ?? "No response",
+      credits: data.remainingCredits
+    };
+  } catch (error) {
+    console.error('Error fetching LLM response:', error);
+    return { content: "Error: Could not get a response.", credits: 0 };
+  }
 };
 

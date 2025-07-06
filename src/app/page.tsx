@@ -1,19 +1,19 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import getCompletion from "./openai";
 import { ChatInput } from "@/components/ChatInput";
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
-import ReactMarkdown from "react-markdown";
-import { Message } from "@/api";
+import { Message, getLLMResponse, generateTitle } from "@/api";
+import { ChatMessage } from "@/components/ChatMessage";
 
 export default function Home() {
 
-  const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch,createBranch } = useStore();
+  const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch,createBranch, setCredits, setBranchTitle } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [parentMessages, setParentMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [branchId] = useState(uuidv4());
   const branchCreatedRef = useRef(false);
 
@@ -49,20 +49,28 @@ export default function Home() {
     const updatedMessages = await addMessageToBranch(branchId, newMessage);
     setMessages(updatedMessages);
     setMessage("");
+    setIsLoading(true);
 
     setTimeout(async () => {
-      const completion = await getCompletion({
-        messages: [...parentMessages, ...updatedMessages], // ✅ Full context including parent
-      });
+      const { content, credits }= await getLLMResponse([...parentMessages, ...updatedMessages]);
+      setCredits(credits);
 
       const aiMessage = {
         role: 'assistant' as const,
-        content: completion.choices[0].message.content ?? "No response",
+        content
       };
 
       // Add AI response the same way
       const finalMessages = await addMessageToBranch(branchId, aiMessage);
       setMessages(finalMessages);
+      setIsLoading(false);
+
+      // Generate title after the first exchange
+      if (finalMessages.length === 2) {
+        const { title, credits: remainingCredits } = await generateTitle(branchId);
+        await setBranchTitle(branchId, title);
+        setCredits(remainingCredits);
+      }
 
       if (window.location.pathname === '/') {
         router.push(`/branch/${branchId}`);
@@ -88,17 +96,20 @@ export default function Home() {
       <div className="flex flex-col p-4">
         <div className="flex-1 mb-4">
           <div className="space-y-4">
-            {messages.map((msg, index) => {
-              return (
-                <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 ${msg.role === 'user' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                    <div >
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+            {messages.map((msg, index) => (
+              <ChatMessage key={index} message={msg} />
+            ))}
+            {isLoading && (
+                <div className="flex justify-start">
+                    <div className="max-w-[80%] p-3 bg-gray-100">
+                        <div className="flex items-center space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              );
-            })}
+            )}
           </div>
         </div>
         <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">

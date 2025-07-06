@@ -21,6 +21,7 @@ model User {
   branches  Branch[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  credits   Float    @default(0.05)
 }
 
 model Branch {

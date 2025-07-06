@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle, createBranch, getBranches } from '../api';
+import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle as apiSetBranchTitle, createBranch, getBranches } from '../api';
 
 interface Message {
     role: 'user' | 'assistant';
     content: string;
 }
+
 
 interface Store {
     messagesByBranch: Record<string, Message[]>;
@@ -20,6 +21,8 @@ interface Store {
     deleteBranch: (branchId: string) => Promise<void>;
     createBranch: (branchId: string, name?: string) => Promise<void>;
     loadBranches: () => Promise<void>;
+    setCredits: (credits: number) => void;
+    credits: number;
 }
 
 export const useStore = create<Store>()(
@@ -28,6 +31,7 @@ export const useStore = create<Store>()(
             messagesByBranch: {},
             branchParents: {},
             branchTitles: {},
+            credits: 0,
             getMessagesForBranch: async (branchId) => {
                 const messages = await getMessages(branchId);
                 set(state => ({
@@ -70,7 +74,7 @@ export const useStore = create<Store>()(
                 return parent?.id || null;
             },
             setBranchTitle: async (branchId, title) => {
-                await setBranchTitle(branchId, title);
+                await apiSetBranchTitle(branchId, title);
                 set(state => ({
                     branchTitles: {
                         ...state.branchTitles,
@@ -113,7 +117,12 @@ export const useStore = create<Store>()(
 
                     return { messagesByBranch, branchParents, branchTitles };
                 });
-            }
+            },
+            setCredits: (credits) => {
+                set(() => ({
+                    credits: credits
+                }));
+            },
         }),
         {
             name: 'chat-storage',
