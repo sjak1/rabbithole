@@ -1,23 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import TopNav from "../components/topnav";
-import '@xyflow/react/dist/style.css';
 import { StoreInitializer } from "@/components/StoreInitializer";
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { ClerkProvider } from '@clerk/nextjs'
+import SideNav from "@/components/SideNav";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,23 +17,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <ClerkProvider>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div className="sticky top-0 z-50">
-          <TopNav />
-        </div>
-        <div className="flex w-full">
-          {/* <SideNav /> */}
-          <div className="flex-1 max-w-4xl mx-auto">
-            <StoreInitializer />
-            {children}
+    <ClerkProvider>
+      <html lang="en">
+        <body className={GeistSans.className}>
+          <StoreInitializer />
+          <SideNav />
+          <div className="ml-64 flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-1 overflow-y-auto p-6">
+              {children}
+            </main>
           </div>
-        </div>
-      </body>
-      </ClerkProvider>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

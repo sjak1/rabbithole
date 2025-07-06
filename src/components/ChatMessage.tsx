@@ -35,15 +35,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
             )}
 
-            <div className={`flex flex-col max-w-[80%] ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+            <div className={`flex flex-col ${message.role === 'user' ? 'max-w-[60%] items-end' : 'items-start w-full'}`}>
                 <div
                     className={`
-                        relative px-5 py-3 rounded-md
+                        relative py-3 text-base
                         ${message.role === 'user'
-                            ? 'bg-zinc-900 text-zinc-50'
-                            : 'bg-zinc-50 border-l-2 border-zinc-200'
+                            ? 'px-5 bg-zinc-900 text-zinc-50 rounded-md shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]'
+                            : ''
                         }
-                        shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]
                     `}
                 >
                     <button

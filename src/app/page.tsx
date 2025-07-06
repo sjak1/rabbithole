@@ -9,7 +9,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 
 export default function Home() {
 
-  const { getMessagesForBranch, addMessageToBranch, setBranchParent, getBranchParent, deleteBranch,createBranch, setCredits, setBranchTitle } = useStore();
+  const { getMessagesForBranch, addMessageToBranch, getBranchParent, createBranch, setCredits, setBranchTitle } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [parentMessages, setParentMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
@@ -78,50 +78,34 @@ export default function Home() {
     }, 0);  
   };
 
-
-  async function handleBranchOut() {
-    const newBranchId = uuidv4();
-    await createBranch(newBranchId);
-    setBranchParent(newBranchId, branchId);
-    router.push(`/branch/${newBranchId}`);
-  }
-
-  async function handleDeleteBranch() {
-    await deleteBranch(branchId);
-    router.push('/');
-  }
-
   return (
     <>
-      <div className="flex flex-col p-4">
-        <div className="flex-1 mb-4">
-          <div className="space-y-4">
-            {messages.map((msg, index) => (
-              <ChatMessage key={index} message={msg} />
-            ))}
-            {isLoading && (
-                <div className="flex justify-start">
-                    <div className="max-w-[80%] p-3 bg-gray-100">
-                        <div className="flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                        </div>
-                    </div>
+      <div className="max-w-4xl mx-auto">
+        <div className="flex-1 space-y-4 pb-36">
+          {messages.map((msg, index) => (
+            <ChatMessage key={index} message={msg} />
+          ))}
+          {isLoading && (
+            <div className="flex items-end gap-3 justify-start">
+              <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
+              <div className="group flex flex-col items-start w-full">
+                <div className="relative px-5 py-3 rounded-md bg-zinc-50 border-l-2 border-zinc-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                    <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                    <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse"></div>
+                  </div>
                 </div>
-            )}
-          </div>
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 pb-4 pt-6">
-          <ChatInput
-            message={message}
-            setMessage={setMessage}
-            onSubmit={handleSubmit}
-            onBranchOut={handleBranchOut}
-            deleteBranch={handleDeleteBranch}
-          />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+      <ChatInput
+          message={message}
+          setMessage={setMessage}
+          onSubmit={handleSubmit}
+      />
     </>
   );
 }
