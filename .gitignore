@@ -46,3 +46,8 @@ src/app/test/page.tsx
 deepseek-api.mjs
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Packages
+packages/*/node_modules/
+packages/*/.next/
+packages/*/dist/
