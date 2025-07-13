@@ -23,7 +23,7 @@ app.post('/branch', requireAuth(), createBranch);
 app.get('/branches', requireAuth(), getBranchesForUser);
 app.delete('/branch/:id', requireAuth(), deleteBranch);
 
-app.get('/', (req, res) => {
+app.get('/', (req: express.Request, res: express.Response) => {
     res.send('Hello from Express!');
 });
 
