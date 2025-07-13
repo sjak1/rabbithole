@@ -1,8 +1,18 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
 import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle as apiSetBranchTitle, createBranch, getBranches, getUser } from '../api';
-import { Message, Branch } from '../types';
 import { User } from '@/types';
+
+interface Message {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+}
+
+interface Branch {
+    id: string;
+    name: string;
+    parentId?: string;
+}
 
 interface Store {
     messagesByBranch: Record<string, Message[]>;
@@ -29,7 +39,7 @@ export const useStore = create<Store>()(
             messagesByBranch: {},
             branchParents: {},
             branchTitles: {},
-            credits: 0,
+            credits: 0.05,
             user: null,
             getMessagesForBranch: async (branchId) => {
                 const messages = await getMessages(branchId);

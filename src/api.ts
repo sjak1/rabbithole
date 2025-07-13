@@ -1,7 +1,16 @@
 const API_URL = 'http://localhost:4000';
 
-import { Message, Branch } from './types';
-import { User } from '@/types';
+interface Message {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+}
+
+interface Branch {
+    id: string;
+    name: string;
+    parentId?: string;
+}
+
 
 export const getMessages = async (branchId: string): Promise<Message[]> => {
     try {
