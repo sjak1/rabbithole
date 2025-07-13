@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/sign-in/[[...sign-in]]/page": "/sign-in/[[...sign-in]]",
+  "/branch/[id]/page": "/branch/[id]",
+  "/flow/page": "/flow",
+  "/sign-up/[[...sign-up]]/page": "/sign-up/[[...sign-up]]",
+  "/test/page": "/test",
+  "/page": "/"
+}
