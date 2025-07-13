@@ -2,7 +2,7 @@ import { User } from '@/types';
 
 const API_URL = 'http://localhost:4000';
 
-interface Message {
+export interface Message {
     role: 'user' | 'assistant' | 'system';
     content: string;
 }
