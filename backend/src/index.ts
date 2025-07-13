@@ -4,7 +4,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, getLLMResponse, generateBranchTitle, getUser } from '../controllers/chatController';
+import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, generateBranchTitle, getUser } from './controllers/chatController';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 const app = express();
 
