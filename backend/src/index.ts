@@ -4,7 +4,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, getLLMResponse, generateBranchTitle } from '../controllers/chatController';
+import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, getLLMResponse, generateBranchTitle, getUser } from '../controllers/chatController';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 const app = express();
 
@@ -14,6 +14,14 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(clerkMiddleware());
+
+// User
+app.get('/api/user', requireAuth(), getUser);
+
+// Branch
+app.post('/branch', requireAuth(), createBranch);
+app.get('/branches', requireAuth(), getBranchesForUser);
+app.delete('/branch/:id', requireAuth(), deleteBranch);
 
 app.get('/', (req, res) => {
     res.send('Hello from Express!');
@@ -27,17 +35,9 @@ app.get('/parent/:branchId', requireAuth(), getBranchParent);
 
 app.post('/parent/:branchId', requireAuth(), setBranchParent); 
 
-app.delete('/branch/:branchId', requireAuth(), deleteBranch);
-
 app.post('/title/:branchId', requireAuth(), setBranchTitle);
 
 app.post('/title/generate/:branchId', requireAuth(), generateBranchTitle);
-
-app.post('/branch', requireAuth(), createBranch);
-
-app.get('/branches', requireAuth(), getBranchesForUser);
-
-app.post('/api/llm', getLLMResponse);
 
 app.listen(4000, () => {
     console.log("Express server is running on port 4000");

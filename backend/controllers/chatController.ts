@@ -232,6 +232,37 @@ export const createBranch = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+export const getUser = async (req: Request, res: Response): Promise<void> => {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    res.status(401).json({ error: 'Not signed in' });
+    return;
+  }
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      const clerkUser = await clerkClient.users.getUser(userId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress || "";
+
+      user = await prisma.user.upsert({
+        where: { id: userId },
+        update: { email, name: clerkUser.firstName },
+        create: { id: userId, email, name: clerkUser.firstName },
+      });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching user:', err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
 export const getBranchesForUser = async (req: Request, res: Response): Promise<void> => {
   const { userId } = getAuth(req);
 

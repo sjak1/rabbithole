@@ -1,12 +1,8 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle as apiSetBranchTitle, createBranch, getBranches } from '../api';
-
-interface Message {
-    role: 'user' | 'assistant';
-    content: string;
-}
-
+import { getMessages, setMessages, setBranchParent, getBranchParent, deleteBranch, setBranchTitle as apiSetBranchTitle, createBranch, getBranches, getUser } from '../api';
+import { Message, Branch } from '../types';
+import { User } from '@/types';
 
 interface Store {
     messagesByBranch: Record<string, Message[]>;
@@ -23,6 +19,8 @@ interface Store {
     loadBranches: () => Promise<void>;
     setCredits: (credits: number) => void;
     credits: number;
+    user: User | null;
+    loadUser: () => Promise<void>;
 }
 
 export const useStore = create<Store>()(
@@ -32,6 +30,7 @@ export const useStore = create<Store>()(
             branchParents: {},
             branchTitles: {},
             credits: 0,
+            user: null,
             getMessagesForBranch: async (branchId) => {
                 const messages = await getMessages(branchId);
                 set(state => ({
@@ -123,6 +122,10 @@ export const useStore = create<Store>()(
                     credits: credits
                 }));
             },
+            loadUser: async () => {
+                const user = await getUser();
+                set(() => ({ user, credits: user?.credits || 0 }));
+            }
         }),
         {
             name: 'chat-storage',

@@ -1,15 +1,7 @@
 const API_URL = 'http://localhost:4000';
 
-export interface Message {
-    role: 'user' | 'assistant';
-    content: string;
-}
-
-export type Branch = {
-  id: string;
-  name: string;
-  parentId?: string | null;
-};
+import { Message, Branch } from './types';
+import { User } from '@/types';
 
 export const getMessages = async (branchId: string): Promise<Message[]> => {
     try {
@@ -113,6 +105,17 @@ export const generateTitle = async (branchId: string): Promise<{title: string, c
         throw error;
     }
 };
+
+export const getUser = async (): Promise<User | null> => {
+    try {
+        const response = await fetch(`${API_URL}/api/user`, { credentials: 'include' });
+        if (!response.ok) throw new Error('Failed to fetch user');
+        return response.json();
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        return null;
+    }
+}
 
 export const createBranch = async (branchId: string, name: string = "New Branch"): Promise<void> => {
     try {

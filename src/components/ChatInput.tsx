@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SendHorizonal, GitFork, Trash2 } from 'lucide-react';
+import ChatInputContainer from "./ChatInputContainer";
 
 interface ChatInputProps {
     message: string;
@@ -12,15 +13,15 @@ interface ChatInputProps {
 
 export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBranch }: ChatInputProps) {
     return (
-        <div className="fixed bottom-6 left-0 right-0 w-full">
+        <ChatInputContainer>
             <div className="max-w-2xl mx-auto px-4">
                 <form 
                     onSubmit={onSubmit}
-                    className="relative flex items-center bg-white/80 backdrop-blur-sm border border-zinc-200 rounded-full shadow-xl p-2"
+                    className="relative flex items-center bg-white/80 backdrop-blur-sm border border-zinc-200 rounded-full shadow-xl p-2 group transition-shadow duration-300 ease-in-out focus-within:ring-2 focus-within:ring-zinc-300"
                 >
                     <Input
                         type="text"
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-base placeholder:text-zinc-500"
+                        className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:ring-offset-0 focus-visible:ring-0 text-base placeholder:text-zinc-500"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type your message..."
@@ -60,6 +61,6 @@ export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBr
                     </div>
                 </form>
             </div>
-        </div>
+        </ChatInputContainer>
     );
 }

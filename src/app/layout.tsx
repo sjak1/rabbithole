@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { StoreInitializer } from "@/components/StoreInitializer";
-import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs';
 import SideNav from "@/components/SideNav";
-import Header from "@/components/Header";
+import MainLayout from "@/components/MainLayout";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,12 +21,11 @@ export default function RootLayout({
       <html lang="en">
         <body className={GeistSans.className}>
           <StoreInitializer />
-          <SideNav />
-          <div className="ml-64 flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-1 overflow-y-auto p-6">
+          <div className="flex min-h-screen">
+            <SideNav />
+            <MainLayout>
               {children}
-            </main>
+            </MainLayout>
           </div>
         </body>
       </html>
