@@ -8,12 +8,6 @@ interface Message {
     content: string;
 }
 
-interface Branch {
-    id: string;
-    name: string;
-    parentId?: string;
-}
-
 interface Store {
     messagesByBranch: Record<string, Message[]>;
     branchParents: Record<string, string>;
@@ -135,7 +129,7 @@ export const useStore = create<Store>()(
             loadUser: async () => {
                 const user = await getUser();
                 set(() => ({ user, credits: user?.credits || 0 }));
-            }
+            },
         }),
         {
             name: 'chat-storage',

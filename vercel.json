@@ -2,22 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "packages/frontend/package.json",
+      "src": "package.json",
       "use": "@vercel/next"
     },
     {
-      "src": "packages/backend/src/index.ts",
+      "src": "backend/src/index.ts",
       "use": "@vercel/node"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/packages/backend/src/index.ts"
+      "destination": "/backend/src/index.ts"
     },
     {
       "source": "/(.*)",
-      "destination": "/packages/frontend"
+      "destination": "/"
     }
   ]
 } 

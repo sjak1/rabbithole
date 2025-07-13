@@ -1,3 +1,5 @@
+import { User } from '@/types';
+
 const API_URL = 'http://localhost:4000';
 
 interface Message {
