@@ -23,7 +23,7 @@ app.post('/branch', requireAuth(), createBranch);
 app.get('/branches', requireAuth(), getBranchesForUser);
 app.delete('/branch/:id', requireAuth(), deleteBranch);
 
-app.get('/', (req: express.Request, res: express.Response) => {
+app.get('/', (req: any, res: any) => {
     res.send('Hello from Express!');
 });
 
@@ -42,3 +42,5 @@ app.post('/title/generate/:branchId', requireAuth(), generateBranchTitle);
 app.listen(4000, () => {
     console.log("Express server is running on port 4000");
 });
+
+export default app;
