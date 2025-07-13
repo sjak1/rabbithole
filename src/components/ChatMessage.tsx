@@ -6,7 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { Clipboard, Check } from 'lucide-react';
-import { Message } from '@/types';
+import { Message } from '@/api';
 
 interface ChatMessageProps {
     message: Message;
