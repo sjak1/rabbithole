@@ -4,7 +4,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, generateBranchTitle, getUser } from './controllers/chatController';
+import { getMessagesForBranch, appendMessageToBranch, getBranchParent, setBranchParent, deleteBranch, setBranchTitle, createBranch, getBranchesForUser, generateBranchTitle, getUser, getLLMResponse } from './controllers/chatController';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 const app = express();
 
@@ -23,10 +23,6 @@ app.post('/branch', requireAuth(), createBranch);
 app.get('/branches', requireAuth(), getBranchesForUser);
 app.delete('/branch/:id', requireAuth(), deleteBranch);
 
-app.get('/', (req: any, res: any) => {
-    res.send('Hello from Express!');
-});
-
 app.get('/messages/:branchId', requireAuth(), getMessagesForBranch);
 
 app.post('/messages/:branchId', requireAuth(), appendMessageToBranch);
@@ -38,6 +34,8 @@ app.post('/parent/:branchId', requireAuth(), setBranchParent);
 app.post('/title/:branchId', requireAuth(), setBranchTitle);
 
 app.post('/title/generate/:branchId', requireAuth(), generateBranchTitle);
+
+app.post('/api/llm', getLLMResponse);
 
 app.listen(4000, () => {
     console.log("Express server is running on port 4000");
