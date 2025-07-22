@@ -11,7 +11,6 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useStore } from "@/store/store";
-import { getBranchTitle } from "@/app/openai";
 import { useEffect, useMemo } from "react";
 
 export default function FlowPage() {
@@ -19,36 +18,10 @@ export default function FlowPage() {
         messagesByBranch,
         branchParents,
         branchTitles,
-        setBranchTitle,
         loadBranches
     } = useStore();
 
-    /* ------------------------------------------------------------------ */
-    /* 🏷️  Auto-generate missing titles ---------------------------------- */
-    /* ------------------------------------------------------------------ */
-    useEffect(() => {
-        const generateTitles = async () => {
-            const work: Promise<void>[] = [];
 
-            Object.entries(messagesByBranch).forEach(([branchId, msgs]) => {
-                if (!branchTitles[branchId] && msgs.length >= 2) {
-                    work.push(
-                        getBranchTitle(msgs)
-                            .then((title) => setBranchTitle(branchId, title))
-                            .catch((err) => {
-                                console.error(`Title generation failed for ${branchId}:`, err);
-                                return setBranchTitle(branchId, `branch-${branchId.slice(0, 4)}`);
-                            })
-                    );
-                }
-            });
-
-            if (work.length) await Promise.all(work);
-        };
-
-        generateTitles();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [messagesByBranch, branchTitles]);
 
     // On mount load branches from backend
     useEffect(() => {
