@@ -6,19 +6,25 @@ import { useStore } from '@/store/store';
 import { usePathname } from 'next/navigation';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, RabbitIcon, GitBranch, LogIn, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/nextjs';
 import { Button } from './ui/button';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
 
 export default function SideNav() {
+    const { getToken } = useAuth();
     const { loadBranches, branchTitles } = useStore();
     const { isSidebarOpen, toggleSidebar } = useUiStore();
     const pathname = usePathname();
 
     useEffect(() => {
-        loadBranches();
-    }, [loadBranches]);
+        const loadBranchesWithToken = async () => {
+            const token = await getToken();
+            if (!token) return;
+            await loadBranches(token);
+        };
+        loadBranchesWithToken();
+    }, [loadBranches, getToken]);
 
     const branches = Object.entries(branchTitles);
 

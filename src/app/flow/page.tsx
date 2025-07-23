@@ -12,8 +12,10 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useStore } from "@/store/store";
 import { useEffect, useMemo } from "react";
+import { useAuth } from "@clerk/nextjs";
 
 export default function FlowPage() {
+    const { getToken } = useAuth();
     const {
         messagesByBranch,
         branchParents,
@@ -21,12 +23,15 @@ export default function FlowPage() {
         loadBranches
     } = useStore();
 
-
-
     // On mount load branches from backend
     useEffect(() => {
-        loadBranches().catch(console.error);
-    }, [loadBranches]);
+        const loadBranchesWithToken = async () => {
+            const token = await getToken();
+            if (!token) return;
+            await loadBranches(token);
+        };
+        loadBranchesWithToken().catch(console.error);
+    }, [loadBranches, getToken]);
 
     /* ------------------------------------------------------------------ */
     /* 🖼️  Build hierarchical layout ------------------------------------ */

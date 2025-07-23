@@ -6,8 +6,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
 import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
+import { useAuth } from "@clerk/nextjs";
 
 export default function BranchPage() {
+    const { getToken } = useAuth();
 
     const getMessagesForBranch = useStore(s => s.getMessagesForBranch);
     const addMessageToBranch = useStore(s => s.addMessageToBranch);
@@ -28,25 +30,30 @@ export default function BranchPage() {
 
     useEffect(() => {
         const loadMessages = async () => {
-            const fetchedMessages = await getMessagesForBranch(branchId);
+            const token = await getToken();
+            if (!token) return;
+            
+            const fetchedMessages = await getMessagesForBranch(branchId, token);
             setMessages(fetchedMessages);
 
-            const parentId = await getBranchParent(branchId);
+            const parentId = await getBranchParent(branchId, token);
             if (parentId) {
-               const fetchedParentMessages = await getMessagesForBranch(parentId);
-            setParentMessages(fetchedParentMessages);
+               const fetchedParentMessages = await getMessagesForBranch(parentId, token);
+               setParentMessages(fetchedParentMessages);
             }
-
         };
         loadMessages();
-    }, [branchId, getMessagesForBranch, getBranchParent]);
+    }, [branchId, getMessagesForBranch, getBranchParent, getToken]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         if (!message.trim()) return;
 
+        const token = await getToken();
+        if (!token) return;
+
         const newMessage = { role: 'user' as const, content: message };
-        const updatedMessages = await addMessageToBranch(branchId, newMessage);
+        const updatedMessages = await addMessageToBranch(branchId, newMessage, token);
         setMessages(updatedMessages);
         setMessage("");
         setIsLoading(true);
@@ -56,7 +63,8 @@ export default function BranchPage() {
             try {
                 const { content, credits } = await getLLMResponse(
                     [...parentMessages, ...updatedMessages],
-                    (streamContent) => {
+                    token,
+                    (streamContent: string) => {
                         setStreamingMessage(streamContent);
                     }
                 );
@@ -69,14 +77,14 @@ export default function BranchPage() {
                     content
                 };
 
-                const finalMessages = await addMessageToBranch(branchId, aiMessage);
+                const finalMessages = await addMessageToBranch(branchId, aiMessage, token);
                 setMessages(finalMessages);
                 setIsLoading(false);
 
                 // Generate title after the first exchange
                 if (finalMessages.length === 2) {
-                    const { title, credits: remainingCredits } = await generateTitle(branchId);
-                    await setBranchTitle(branchId, title);
+                    const { title, credits: remainingCredits } = await generateTitle(branchId, token);
+                    await setBranchTitle(branchId, title, token);
                     setCredits(remainingCredits);
                 }
             } catch (error) {
@@ -88,14 +96,20 @@ export default function BranchPage() {
     }
 
     async function handleBranchOut() {
+        const token = await getToken();
+        if (!token) return;
+        
         const newBranchId = uuidv4();
-        await createBranch(newBranchId);
-        await setBranchParent(newBranchId, branchId);
+        await createBranch(newBranchId, "New Branch", token);
+        await setBranchParent(newBranchId, branchId, token);
         router.push(`/branch/${newBranchId}`);
     }
 
     async function handleDeleteBranch() {
-        await deleteBranch(branchId);
+        const token = await getToken();
+        if (!token) return;
+        
+        await deleteBranch(branchId, token);
         router.push('/');
     }
 

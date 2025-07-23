@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/store/store";
 import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { RabbitIcon } from "lucide-react";
 
 export default function Home() {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const { getMessagesForBranch, addMessageToBranch, getBranchParent, createBranch, setCredits, setBranchTitle } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [parentMessages, setParentMessages] = useState<Message[]>([]);
@@ -23,32 +24,38 @@ export default function Home() {
   const router = useRouter();
   useEffect(() => {
    const loadParents = async () => {
+     const token = await getToken();
+     if (!token) return;
+     
      // Only try to get parent if branch exists (after first message)
      if (branchCreatedRef.current) {
-       const parentId = await getBranchParent(branchId);
+       const parentId = await getBranchParent(branchId, token);
        if (parentId) {
-         const fetchedParentMessages = await getMessagesForBranch(parentId);
+         const fetchedParentMessages = await getMessagesForBranch(parentId, token);
          setParentMessages(fetchedParentMessages);
        }
      }
    };
    loadParents();
-  }, [branchId, getMessagesForBranch, getBranchParent]);
+  }, [branchId, getMessagesForBranch, getBranchParent, getToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
+    const token = await getToken();
+    if (!token) return;
+
     // Lazily create the branch on first user message to avoid empty branches in DB
     if (!branchCreatedRef.current) {
-      await createBranch(branchId);
+      await createBranch(branchId, "New Branch", token);
       branchCreatedRef.current = true;
     }
 
     const newMessage = { role: 'user' as const, content: message };
 
     // Let backend handle adding to array, get updated messages back
-    const updatedMessages = await addMessageToBranch(branchId, newMessage);
+    const updatedMessages = await addMessageToBranch(branchId, newMessage, token);
     setMessages(updatedMessages);
     setMessage("");
     setIsLoading(true);
@@ -58,7 +65,8 @@ export default function Home() {
       try {
         const { content, credits } = await getLLMResponse(
           [...parentMessages, ...updatedMessages],
-          (streamContent) => {
+          token,
+          (streamContent: string) => {
             setStreamingMessage(streamContent);
           }
         );
@@ -71,14 +79,14 @@ export default function Home() {
         };
 
         // Add AI response the same way
-        const finalMessages = await addMessageToBranch(branchId, aiMessage);
+        const finalMessages = await addMessageToBranch(branchId, aiMessage, token);
         setMessages(finalMessages);
         setIsLoading(false);
 
         // Generate title after the first exchange
         if (finalMessages.length === 2) {
-          const { title, credits: remainingCredits } = await generateTitle(branchId);
-          await setBranchTitle(branchId, title);
+          const { title, credits: remainingCredits } = await generateTitle(branchId, token);
+          await setBranchTitle(branchId, title, token);
           setCredits(remainingCredits);
         }
 
