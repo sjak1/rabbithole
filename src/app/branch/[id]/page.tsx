@@ -7,7 +7,7 @@ import { useStore } from "@/store/store";
 import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
 
-export default function Home() {
+export default function BranchPage() {
 
     const getMessagesForBranch = useStore(s => s.getMessagesForBranch);
     const addMessageToBranch = useStore(s => s.addMessageToBranch);

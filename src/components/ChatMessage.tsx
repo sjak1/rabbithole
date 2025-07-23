@@ -64,7 +64,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                     const codeString = String(children).replace(/\n$/, '');
                                     
                                     // Generate a stable key for the code block
-                                    const codeIndex = node?.position?.start?.offset ?? Math.random();
+                                    const codeIndex = node?.position?.start?.offset ?? 0;
 
                                     return match ? (
                                         <div className="relative group/code my-4 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
