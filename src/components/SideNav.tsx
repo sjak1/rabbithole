@@ -84,53 +84,48 @@ export default function SideNav() {
                         {isSidebarOpen && "View Flow"}
                     </Link>
                 </div>
-                <AnimatePresence>
-                    {isSidebarOpen && (
-                        <motion.div
+                {isSidebarOpen && (
+                    <ScrollArea className="flex-1">
+                        <motion.nav
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
                             transition={{ duration: 0.2, delay: 0.1 }}
-                            className="flex-1"
+                            className="px-4 pb-4"
                         >
-                            <ScrollArea className="flex-1">
-                                <nav className="px-4 pb-4">
-                                    <p className="px-4 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chats</p>
-                                    <ul className="space-y-1">
-                                        {branches.map(([id, title], index) => {
-                                            const isActive = pathname === `/branch/${id}`;
-                                            return (
-                                                <motion.li 
-                                                    key={id}
-                                                    initial={{ opacity: 0, x: -20 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ 
-                                                        duration: 0.3, 
-                                                        delay: index * 0.05,
-                                                        ease: [0.16, 1, 0.3, 1]
-                                                    }}
-                                                >
-                                                    <Link
-                                                        href={`/branch/${id}`}
-                                                        className={cn(
-                                                            "block w-full text-left px-4 py-2 text-sm rounded-md transition-colors",
-                                                            isActive
-                                                                ? 'bg-zinc-200 text-zinc-900 font-semibold'
-                                                                : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                                                        )}
-                                                        title={title}
-                                                    >
-                                                        <span className="break-words">{title}</span>
-                                                    </Link>
-                                                </motion.li>
-                                            );
-                                        })}
-                                    </ul>
-                                </nav>
-                            </ScrollArea>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            <p className="px-4 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chats</p>
+                            <ul className="space-y-1">
+                                {branches.map(([id, title], index) => {
+                                    const isActive = pathname === `/branch/${id}`;
+                                    return (
+                                        <motion.li 
+                                            key={id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ 
+                                                duration: 0.3, 
+                                                delay: index * 0.05,
+                                                ease: [0.16, 1, 0.3, 1]
+                                            }}
+                                        >
+                                            <Link
+                                                href={`/branch/${id}`}
+                                                className={cn(
+                                                    "block w-full text-left px-4 py-2 text-sm rounded-md transition-colors",
+                                                    isActive
+                                                        ? 'bg-zinc-200 text-zinc-900 font-semibold'
+                                                        : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                                                )}
+                                                title={title}
+                                            >
+                                                <span className="break-words">{title}</span>
+                                            </Link>
+                                        </motion.li>
+                                    );
+                                })}
+                            </ul>
+                        </motion.nav>
+                    </ScrollArea>
+                )}
             </SignedIn>
 
             <SignedOut>
