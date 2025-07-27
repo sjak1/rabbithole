@@ -82,13 +82,14 @@ export default function SideNav() {
                                             <Link
                                                 href={`/branch/${id}`}
                                                 className={cn(
-                                                    "block w-full text-left px-4 py-2 text-sm rounded-md truncate transition-colors",
+                                                    "block w-full text-left px-4 py-2 text-sm rounded-md transition-colors",
                                                     isActive
                                                         ? 'bg-zinc-200 text-zinc-900 font-semibold'
                                                         : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
                                                 )}
+                                                title={title}
                                             >
-                                                {title}
+                                                <span className="break-words">{title}</span>
                                             </Link>
                                         </li>
                                     );

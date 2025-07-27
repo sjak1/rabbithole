@@ -106,10 +106,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                     <p className="mb-2 last:mb-0 break-words">{children}</p>
                                 ),
                                 ul: ({ children }) => (
-                                    <ul className="list-disc list-inside mb-2 last:mb-0 break-words">{children}</ul>
+                                    <ul className="list-disc list-outside ml-6 mb-2 last:mb-0 break-words">{children}</ul>
                                 ),
                                 ol: ({ children }) => (
-                                    <ol className="list-decimal list-inside mb-2 last:mb-0 break-words">{children}</ol>
+                                    <ol className="list-decimal list-outside ml-6 mb-2 last:mb-0 break-words">{children}</ol>
                                 ),
                                 li: ({ children }) => (
                                     <li className="mb-1 break-words">{children}</li>
