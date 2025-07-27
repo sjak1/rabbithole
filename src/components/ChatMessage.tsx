@@ -6,6 +6,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { Clipboard, Check } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Message } from '@/api';
 
 interface ChatMessageProps {
@@ -28,15 +29,34 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     };
 
     return (
-        <div
+        <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+                duration: 0.5, 
+                ease: [0.23, 1, 0.32, 1],
+                delay: 0.1
+            }}
             className={`flex items-end gap-3 group relative ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
         >
             {message.role === 'assistant' && (
-                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300 flex-shrink-0" />
+                <motion.div 
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3, ease: "backOut" }}
+                    className="w-2 h-2 mb-4 rounded-full bg-zinc-300 flex-shrink-0" 
+                />
             )}
 
             <div className={`flex flex-col ${message.role === 'user' ? 'max-w-[60%] items-end' : 'items-start max-w-[calc(100%-2rem)]'}`}>
-                <div
+                <motion.div
+                    initial={{ opacity: 0, x: message.role === 'user' ? 30 : -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ 
+                        duration: 0.4, 
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: 0.15
+                    }}
                     className={`
                         relative py-3 text-base leading-loose break-words
                         ${message.role === 'user'
@@ -131,12 +151,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                             {message.content}
                         </ReactMarkdown>
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {message.role === 'user' && (
-                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-400 flex-shrink-0" />
+                <motion.div 
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3, ease: "backOut" }}
+                    className="w-2 h-2 mb-4 rounded-full bg-zinc-400 flex-shrink-0" 
+                />
             )}
-        </div>
+        </motion.div>
     );
 }; 

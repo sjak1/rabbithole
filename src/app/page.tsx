@@ -8,6 +8,7 @@ import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { RabbitIcon } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function Home() {
   const { user } = useUser();
@@ -104,27 +105,59 @@ export default function Home() {
   // Show centered welcome screen if no messages yet
   if (messages.length === 0 && !isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]"
+      >
         <div className="text-center space-y-8 max-w-2xl mx-auto px-4">
           {/* Big Logo */}
-          <div className="flex items-center justify-center">
+          <motion.div 
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ 
+              duration: 0.8, 
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.2
+            }}
+            className="flex items-center justify-center"
+          >
             <div className="w-20 h-20 flex items-center justify-center bg-zinc-900 rounded-2xl shadow-lg">
               <RabbitIcon className="w-12 h-12 text-white" />
             </div>
-          </div>
+          </motion.div>
           
           {/* Greeting */}
-          <div className="space-y-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.6, 
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.4
+            }}
+            className="space-y-2"
+          >
             <h1 className="text-3xl font-bold text-zinc-900">
               Hey {user?.firstName || 'there'}, what would you like to explore today?
             </h1>
             <p className="text-lg text-zinc-600">
               Start a conversation and dive down the rabbit hole of possibilities
             </p>
-          </div>
+          </motion.div>
           
           {/* Input Box - positioned right after the paragraph */}
-          <div className="w-full max-w-2xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              duration: 0.5, 
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.6
+            }}
+            className="w-full max-w-2xl"
+          >
             <div className="relative">
               <form 
                 onSubmit={handleSubmit}
@@ -148,9 +181,9 @@ export default function Home() {
                 </button>
               </form>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 

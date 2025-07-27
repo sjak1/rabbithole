@@ -10,6 +10,7 @@ import { SignedIn, SignedOut, SignInButton, useAuth } from '@clerk/nextjs';
 import { Button } from './ui/button';
 import { useUiStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function SideNav() {
     const { getToken } = useAuth();
@@ -29,26 +30,39 @@ export default function SideNav() {
     const branches = Object.entries(branchTitles);
 
     return (
-        <aside
-            className={cn(
-                "flex flex-col fixed inset-y-0 z-40 bg-white border-r border-zinc-200 transition-all duration-300 ease-in-out",
-                isSidebarOpen ? "w-64" : "w-20"
-            )}
+        <motion.aside
+            animate={{ 
+                width: isSidebarOpen ? 256 : 80 
+            }}
+            transition={{ 
+                duration: 0.3, 
+                ease: [0.16, 1, 0.3, 1] 
+            }}
+            className="flex flex-col fixed inset-y-0 z-40 bg-white border-r border-zinc-200"
         >
             <div className={cn(
                 "p-4 border-b border-zinc-200 flex items-center",
                 isSidebarOpen ? "justify-between" : "justify-center"
             )}>
-                {isSidebarOpen && (
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 flex items-center justify-center bg-zinc-900 rounded-lg">
-                            <RabbitIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="text-lg font-semibold text-zinc-900">
-                            Rabbithole
-                        </span>
-                    </Link>
-                )}
+                <AnimatePresence mode="wait">
+                    {isSidebarOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <Link href="/" className="flex items-center gap-2 group">
+                                <div className="w-8 h-8 flex items-center justify-center bg-zinc-900 rounded-lg">
+                                    <RabbitIcon className="w-5 h-5 text-white" />
+                                </div>
+                                <span className="text-lg font-semibold text-zinc-900">
+                                    Rabbithole
+                                </span>
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 <Button variant="ghost" size="icon" onClick={toggleSidebar} className="text-zinc-500 hover:text-zinc-900 group">
                     {isSidebarOpen ? <PanelLeftClose size={20} /> : (
                         <div className="w-8 h-8 flex items-center justify-center bg-zinc-900 rounded-lg group-hover:bg-zinc-800 transition-colors">
@@ -70,34 +84,53 @@ export default function SideNav() {
                         {isSidebarOpen && "View Flow"}
                     </Link>
                 </div>
-                {isSidebarOpen && (
-                    <ScrollArea className="flex-1">
-                        <nav className="px-4 pb-4">
-                            <p className="px-4 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chats</p>
-                            <ul className="space-y-1">
-                                {branches.map(([id, title]) => {
-                                    const isActive = pathname === `/branch/${id}`;
-                                    return (
-                                        <li key={id}>
-                                            <Link
-                                                href={`/branch/${id}`}
-                                                className={cn(
-                                                    "block w-full text-left px-4 py-2 text-sm rounded-md transition-colors",
-                                                    isActive
-                                                        ? 'bg-zinc-200 text-zinc-900 font-semibold'
-                                                        : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                                                )}
-                                                title={title}
-                                            >
-                                                <span className="break-words">{title}</span>
-                                            </Link>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </nav>
-                    </ScrollArea>
-                )}
+                <AnimatePresence>
+                    {isSidebarOpen && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2, delay: 0.1 }}
+                            className="flex-1"
+                        >
+                            <ScrollArea className="flex-1">
+                                <nav className="px-4 pb-4">
+                                    <p className="px-4 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chats</p>
+                                    <ul className="space-y-1">
+                                        {branches.map(([id, title], index) => {
+                                            const isActive = pathname === `/branch/${id}`;
+                                            return (
+                                                <motion.li 
+                                                    key={id}
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ 
+                                                        duration: 0.3, 
+                                                        delay: index * 0.05,
+                                                        ease: [0.16, 1, 0.3, 1]
+                                                    }}
+                                                >
+                                                    <Link
+                                                        href={`/branch/${id}`}
+                                                        className={cn(
+                                                            "block w-full text-left px-4 py-2 text-sm rounded-md transition-colors",
+                                                            isActive
+                                                                ? 'bg-zinc-200 text-zinc-900 font-semibold'
+                                                                : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                                                        )}
+                                                        title={title}
+                                                    >
+                                                        <span className="break-words">{title}</span>
+                                                    </Link>
+                                                </motion.li>
+                                            );
+                                        })}
+                                    </ul>
+                                </nav>
+                            </ScrollArea>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </SignedIn>
 
             <SignedOut>
@@ -120,6 +153,6 @@ export default function SideNav() {
                     </div>
                 </div>
             </SignedOut>
-        </aside>
+        </motion.aside>
     );
 }
