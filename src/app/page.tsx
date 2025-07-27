@@ -8,7 +8,7 @@ import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { RabbitIcon } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 
 export default function Home() {
   const { user } = useUser();
