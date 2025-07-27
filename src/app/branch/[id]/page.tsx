@@ -7,6 +7,7 @@ import { useStore } from "@/store/store";
 import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useAuth } from "@clerk/nextjs";
+import Skeleton from "react-loading-skeleton";
 
 export default function BranchPage() {
     const { getToken } = useAuth();
@@ -24,11 +25,13 @@ export default function BranchPage() {
     const [parentMessages, setParentMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [streamingMessage, setStreamingMessage] = useState("");
+    const [isSkeleton, setIsSkeleton] = useState(false);
     const params = useParams();
     const branchId = params?.id as string;
     const router = useRouter();
 
     useEffect(() => {
+        setIsSkeleton(true);
         const loadMessages = async () => {
             const token = await getToken();
             if (!token) return;
@@ -41,6 +44,7 @@ export default function BranchPage() {
                const fetchedParentMessages = await getMessagesForBranch(parentId, token);
                setParentMessages(fetchedParentMessages);
             }
+            setIsSkeleton(false);
         };
         loadMessages();
     }, [branchId, getMessagesForBranch, getBranchParent, getToken]);
@@ -114,7 +118,12 @@ export default function BranchPage() {
     }
 
     return (
-        <>
+        <>  
+            {isSkeleton && (
+                <div className="max-w-[49rem] mx-auto">
+                    <Skeleton count={10} />
+                </div>
+            )}
             <div className="max-w-[49rem] mx-auto">
                 <div className="flex-1 space-y-8 pb-36">
                     {messages.map((msg, index) => (
