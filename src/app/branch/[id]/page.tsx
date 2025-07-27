@@ -8,6 +8,7 @@ import { Message, getLLMResponse, generateTitle } from "@/api";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useAuth } from "@clerk/nextjs";
 import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 export default function BranchPage() {
     const { getToken } = useAuth();
