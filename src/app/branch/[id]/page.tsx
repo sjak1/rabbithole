@@ -38,14 +38,19 @@ export default function BranchPage() {
             if (!token) return;
             
             const fetchedMessages = await getMessagesForBranch(branchId, token);
-            setMessages(fetchedMessages);
-
             const parentId = await getBranchParent(branchId, token);
+            let fetchedParentMessages: Message[] = [];
+            
             if (parentId) {
-               const fetchedParentMessages = await getMessagesForBranch(parentId, token);
-               setParentMessages(fetchedParentMessages);
+                fetchedParentMessages = await getMessagesForBranch(parentId, token);
             }
-            setIsSkeleton(false);
+            
+            // Set all data at once, then hide skeleton
+            setMessages(fetchedMessages);
+            setParentMessages(fetchedParentMessages);
+            setTimeout(() => {
+                setIsSkeleton(false);
+            },2000);
         };
         loadMessages();
     }, [branchId, getMessagesForBranch, getBranchParent, getToken]);
@@ -120,37 +125,48 @@ export default function BranchPage() {
 
     return (
         <>  
-            {isSkeleton && (
-                <div className="max-w-[49rem] mx-auto">
-                    <Skeleton count={10} />
-                </div>
-            )}
-            <div className="max-w-[49rem] mx-auto">
-                <div className="flex-1 space-y-8 pb-36">
-                    {messages.map((msg, index) => (
-                        <ChatMessage key={index} message={msg} />
+            {isSkeleton ? (
+                <div className="max-w-[35rem] mx-auto">
+                    {Array.from({length: 10}).map((_, index) => (
+                        index % 2 === 0 ? (
+                            <div className="" key={index}>
+                                <Skeleton height={50} width="50%" />
+                            </div>
+                        ) : (
+                            <div className="mt-10" key={index}>
+                                <Skeleton height={50} width="70%" />
+                            </div>
+                        )
                     ))}
-                    {streamingMessage && (
-                        <ChatMessage 
-                            message={{ role: 'assistant', content: streamingMessage }} 
-                        />
-                    )}
-                    {isLoading && !streamingMessage && (
-                        <div className="flex items-end gap-3 justify-start">
-                            <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
-                            <div className="group flex flex-col items-start w-full">
-                                <div className="relative px-5 py-3 rounded-md bg-zinc-50 border-l-2 border-zinc-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
-                                    <div className="flex space-x-1">
-                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
-                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
-                                        <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse"></div>
+                </div>
+            ) : (
+                <div className="max-w-[49rem] mx-auto">
+                    <div className="flex-1 space-y-8 pb-36">
+                        {messages.map((msg, index) => (
+                            <ChatMessage key={index} message={msg} />
+                        ))}
+                        {streamingMessage && (
+                            <ChatMessage 
+                                message={{ role: 'assistant', content: streamingMessage }} 
+                            />
+                        )}
+                        {isLoading && !streamingMessage && (
+                            <div className="flex items-end gap-3 justify-start">
+                                <div className="w-2 h-2 mb-4 rounded-full bg-zinc-300" />
+                                <div className="group flex flex-col items-start w-full">
+                                    <div className="relative px-5 py-3 rounded-md bg-zinc-50 border-l-2 border-zinc-200 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
+                                        <div className="flex space-x-1">
+                                            <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.3s]"></div>
+                                            <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse [animation-delay:-0.15s]"></div>
+                                            <div className="w-2 h-2 bg-zinc-400 rounded-full animate-pulse"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
             <ChatInput
                 message={message}
                 setMessage={setMessage}
