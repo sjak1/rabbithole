@@ -29,6 +29,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     };
 
     return (
+        // Main container - handles overall message layout and animation
         <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -37,8 +38,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 ease: [0.23, 1, 0.32, 1],
                 delay: 0.1
             }}
+            // Layout: user messages on right, AI messages on left
             className={`flex items-end gap-3 group relative ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
         >
+            {/* AI Avatar - only shows for assistant messages */}
             {message.role === 'assistant' && (
                 <motion.div 
                     initial={{ scale: 0, opacity: 0 }}
@@ -48,7 +51,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 />
             )}
 
+            {/* Message bubble container */}
             <div className={`flex flex-col ${message.role === 'user' ? 'max-w-[60%] items-end' : 'items-start max-w-[calc(100%-2rem)]'}`}>
+                {/* Actual message bubble with text */}
                 <motion.div
                     initial={{ opacity: 0, x: message.role === 'user' ? 30 : -30 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -57,6 +62,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                         ease: [0.16, 1, 0.3, 1],
                         delay: 0.15
                     }}
+                    // Styling: dark for user, light for AI
                     className={`
                         relative py-3 text-base leading-loose break-words
                         ${message.role === 'user'
@@ -65,6 +71,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                         }
                     `}
                 >
+                    {/* Copy button - appears on hover */}
                     <button
                         onClick={() => handleCopy(message.content)}
                         className={`absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity ${
@@ -75,10 +82,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                     >
                         {isCopied ? <Check size={14} /> : <Clipboard size={14} />}
                     </button>
+                    
+                    {/* Message content with markdown rendering */}
                     <div className="pr-8 overflow-hidden">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
+                                // Code block with syntax highlighting
                                 code({ node, className, children }) {
                                     const match = /language-(\w+)/.exec(className || '');
                                     const codeString = String(children).replace(/\n$/, '');
@@ -88,6 +98,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
                                     return match ? (
                                         <div className="relative group/code my-4 bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                                            {/* Code block header with language and copy button */}
                                             <div className="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-0 group-hover/code:opacity-100 transition-opacity duration-300">
                                                 <span className="text-xs text-zinc-400 select-none">
                                                     {match[1]}
@@ -103,6 +114,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                                     )}
                                                 </button>
                                             </div>
+                                            {/* Syntax highlighted code */}
                                             <SyntaxHighlighter
                                                 style={vscDarkPlus as { [key: string]: React.CSSProperties }}
                                                 language={match[1]}
@@ -117,14 +129,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                             </SyntaxHighlighter>
                                         </div>
                                     ) : (
+                                        // Inline code (not a block)
                                         <code className="bg-zinc-200 text-zinc-800 px-1 py-0.5 rounded-md break-all">
                                             {children}
                                         </code>
                                     );
                                 },
+                                // Paragraph styling
                                 p: ({ children }) => (
                                     <p className="mb-2 last:mb-0 break-words">{children}</p>
                                 ),
+                                // List styling
                                 ul: ({ children }) => (
                                     <ul className="list-disc list-outside ml-6 mb-2 last:mb-0 break-words">{children}</ul>
                                 ),
@@ -134,6 +149,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                 li: ({ children }) => (
                                     <li className="mb-1 break-words">{children}</li>
                                 ),
+                                // Heading styling
                                 h1: ({ children }) => (
                                     <h1 className="text-xl font-bold mb-2 break-words">{children}</h1>
                                 ),
@@ -143,6 +159,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                                 h3: ({ children }) => (
                                     <h3 className="text-md font-semibold mb-2 break-words">{children}</h3>
                                 ),
+                                // Quote styling
                                 blockquote: ({ children }) => (
                                     <blockquote className="border-l-4 border-zinc-300 pl-4 italic mb-2 break-words">{children}</blockquote>
                                 ),
@@ -154,6 +171,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 </motion.div>
             </div>
 
+            {/* User Avatar - only shows for user messages */}
             {message.role === 'user' && (
                 <motion.div 
                     initial={{ scale: 0, opacity: 0 }}

@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
 import { SendHorizonal, GitFork, Trash2 } from 'lucide-react';
 import ChatInputContainer from "./ChatInputContainer";
@@ -17,14 +17,18 @@ export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBr
             <div className="max-w-2xl mx-auto px-4">
                 <form 
                     onSubmit={onSubmit}
-                    className="relative flex items-center bg-white/80 backdrop-blur-sm border border-zinc-200 rounded-full shadow-xl p-2 group transition-shadow duration-300 ease-in-out focus-within:ring-2 focus-within:ring-zinc-300"
+                    className="relative flex items-center bg-white/80 backdrop-blur-sm border border-zinc-200 rounded-xl shadow-xl p-3 group transition-shadow duration-300 ease-in-out focus-within:ring-2 focus-within:ring-zinc-300"
                 >
-                    <Input
-                        type="text"
-                        className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:ring-offset-0 focus-visible:ring-0 text-base placeholder:text-zinc-500"
+                    <textarea
+                        className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:ring-offset-0 focus-visible:ring-0 text-base placeholder:text-zinc-500 resize-none min-h-[40px] max-h-32 overflow-y-auto py-2"
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={(e) => {
+                            setMessage(e.target.value);
+                            e.target.style.height = 'auto';
+                            e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+                        }}   
                         placeholder="Type your message..."
+                        rows={1}
                     />
                     <div className="flex items-center gap-1">
                         <Button
