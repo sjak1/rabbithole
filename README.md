@@ -2,6 +2,8 @@
 
 A chat application that lets you explore alternate conversation paths, like diving down different rabbit holes. Create branches at any point in a conversation to explore "what if" scenarios, with an interactive visualization of your conversation multiverse.
 
+https://rabbitholeapp.vercel.app/
+
 ## DEMO : 
 
 https://www.loom.com/share/9bdbe18902894c96959be98e31c9acfb?sid=f27d32ab-3ef8-4a78-bed8-be90df465d36
