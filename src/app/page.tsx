@@ -171,6 +171,12 @@ export default function Home() {
                     e.target.style.height = '0px';
                     e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      e.currentTarget.form?.requestSubmit();
+                    }
+                  }}
                   placeholder="Type your message..."
                   rows={1}
                 />

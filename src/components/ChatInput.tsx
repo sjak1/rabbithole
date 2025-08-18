@@ -27,6 +27,12 @@ export function ChatInput({ message, setMessage, onSubmit, onBranchOut, deleteBr
                             e.target.style.height = 'auto';
                             e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
                         }}   
+                        onKeyDown={(e)=>{
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                e.currentTarget.form?.requestSubmit();
+                            }
+                        }}
                         placeholder="Type your message..."
                         rows={1}
                     />
